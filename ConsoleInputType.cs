@@ -1,9 +1,9 @@
 ﻿namespace MMaster
 {
-  public enum ConsoleInputType
-  {
-    String,
-    Int,
-    Double,
-  }
+    public enum ConsoleInputType
+    {
+        String,
+        Int,
+        Double,
+    }
 }

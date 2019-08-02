@@ -6,27 +6,26 @@
 // Reference other assemblies with REF comments as above
 
 using MMaster; // Must be implemented
-using System;
 using System.Windows.Forms;
 
 namespace MyNamespace
-{                
-	public static class CommandClass
-	{		
-		[MMasterCommand("Shows a message box.")] // MMaster command declaration attribute: [MMasterCommand([string help = ""],[bool requiresAdminRights = false])]
-		public static void CommandName(string message = null) // Call this command with 'CommandClass.CommandName'
-		{
-			// Edit code here
-			Application.EnableVisualStyles();
-			
-			if (message == null)
-			{
-				message = CInput.ReadFromConsole("Message to print: ").ToString();
-			}
+{
+    public static class CommandClass
+    {
+        [MMasterCommand("Shows a message box.")] // MMaster command declaration attribute: [MMasterCommand([string help = ""],[bool requiresAdminRights = false])]
+        public static void CommandName(string message = null) // Call this command with 'CommandClass.CommandName'
+        {
+            // Edit code here
+            Application.EnableVisualStyles();
 
-			MessageBox.Show(message);
-		}
-	}
+            if (message == null)
+            {
+                message = CInput.ReadFromConsole("Message to print: ").ToString();
+            }
+
+            MessageBox.Show(message);
+        }
+    }
 }
 
 /// <information>
