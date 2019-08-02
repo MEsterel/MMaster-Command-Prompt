@@ -104,7 +104,7 @@ namespace MMaster
                   objectList.RemoveAt(index);
                   objectList.Insert(index, obj);
                 }
-                catch (ArgumentException ex)
+                catch (ArgumentException)
                 {
                   throw new ArgumentException(string.Format("The value passed for argument '{0}' cannot be parsed to type '{1}'", (object) parameterInfo.Name, (object) parameterType.Name));
                 }

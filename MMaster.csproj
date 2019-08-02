@@ -34,6 +34,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleAnswerType.cs" />
@@ -44,12 +45,24 @@
     <Compile Include="CRawInputCommand.cs" />
     <Compile Include="CFormat.cs" />
     <Compile Include="FileID.cs" />
+    <Compile Include="FileTemplate.cs" />
     <Compile Include="MMasterCommand.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="Properties\Settings.cs" />
     <Compile Include="Commands\CmdMngr.cs" />
     <Compile Include="Commands\Default.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
