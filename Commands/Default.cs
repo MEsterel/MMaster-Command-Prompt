@@ -9,6 +9,12 @@ namespace MMaster.Commands
 {
     public static class Default
     {
+        [MMasterCommand("Debug command for various tests.")]
+        public static void Debug()
+        {
+            CFormat.DrawProgressBar(37, 100, 30, '■');
+        }
+
         [MMasterCommand("Get the help prompt for a specific command.", false)]
         public static void Help(string command = null)
         {

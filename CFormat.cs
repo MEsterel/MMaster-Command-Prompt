@@ -161,12 +161,9 @@ namespace MMaster
                 empty1 += progressCharacter.ToString();
             for (int index = 0; index < barSize - num2; ++index)
                 empty2 += progressCharacter.ToString();
-            Console.ForegroundColor = primaryColor;
-            CFormat.Write(empty1, ConsoleColor.Gray);
-            Console.ForegroundColor = secondaryColor;
-            CFormat.Write(empty2, ConsoleColor.Gray);
-            Console.ForegroundColor = primaryColor;
-            CFormat.Write(string.Format(" {0}%", (object)(num1 * 100.0).ToString("N2")), ConsoleColor.Gray);
+            CFormat.Write(empty1, primaryColor);
+            CFormat.Write(empty2, secondaryColor);
+            CFormat.Write(string.Format(" {0}%", (object)(num1 * 100.0).ToString("N2")), primaryColor);
             Console.ResetColor();
             Console.CursorVisible = true;
             Console.CursorLeft = cursorLeft;
