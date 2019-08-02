@@ -42,8 +42,13 @@
     <Compile Include="ConsoleInputType.cs" />
     <Compile Include="CInput.cs" />
     <Compile Include="CommandManager.cs" />
-    <Compile Include="CRawInputCommand.cs" />
+    <Compile Include="CParsedInput.cs" />
     <Compile Include="CFormat.cs" />
+    <Compile Include="Exceptions\ArgumentParseException.cs" />
+    <Compile Include="Exceptions\LibraryNotExistingException.cs" />
+    <Compile Include="Exceptions\CommandNotExistingException.cs" />
+    <Compile Include="Exceptions\MissingArgumentException.cs" />
+    <Compile Include="Exceptions\WrongCallFormatException.cs" />
     <Compile Include="FileID.cs" />
     <Compile Include="FileTemplate.cs" />
     <Compile Include="MMasterCommand.cs" />

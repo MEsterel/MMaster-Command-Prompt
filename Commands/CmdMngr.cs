@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MMaster.Commands
 {
-    [MMasterLibrary("Loads internal and external commands.")]
+    [MMasterLibrary("Loads internal and external commands.", "CM")]
     public static class CmdMngr
     {
         public const string _templateFileNameWithoutExtension = "MMaster Command File";
@@ -40,14 +40,14 @@ namespace MMaster.Commands
         [MMasterCommand("Get the list of the loaded files.")]
         public static void LoadedFiles()
         {
-            if (CommandManager._listLoadedFiles.Count == 0)
+            if (CommandManager.LoadedFileIDs.Count == 0)
             {
                 CFormat.WriteLine("[CommandManager] There are no external files loaded.", ConsoleColor.Gray);
             }
             else
             {
                 CFormat.WriteLine("[CommandManager] List of loaded files: ", ConsoleColor.Gray);
-                foreach (FileID listLoadedFile in CommandManager._listLoadedFiles)
+                foreach (FileID listLoadedFile in CommandManager.LoadedFileIDs)
                     CFormat.WriteLine(string.Format("{0}({1}) {2}", CFormat.Indent(2), listLoadedFile.ID, listLoadedFile.Path), ConsoleColor.Gray);
             }
         }
@@ -58,7 +58,7 @@ namespace MMaster.Commands
             CmdMngr.LoadedFiles();
             CFormat.JumpLine();
             CFormat.WriteLine("Please enter the number ID of the file you want to unload.", ConsoleColor.Gray);
-            int id = CInput.UserPickInt(CommandManager._listLoadedFiles.Count - 1);
+            int id = CInput.UserPickInt(CommandManager.LoadedFileIDs.Count - 1);
             if (id == -1)
                 return;
             CommandManager.UnloadFile(id);

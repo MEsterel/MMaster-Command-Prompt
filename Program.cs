@@ -36,7 +36,7 @@ namespace MMaster
                 while (string.IsNullOrWhiteSpace(obj.ToString()));
                 try
                 {
-                    Program.Execute(new CRawInputCommand(obj.ToString()));
+                    Program.Execute(new CParsedInput(obj.ToString()));
                 }
                 catch (Exception ex)
                 {
@@ -45,39 +45,41 @@ namespace MMaster
             }
         }
 
-        private static void Execute(CRawInputCommand rawCommand)
+        private static void Execute(CParsedInput parsedInput)
         {
-            if (rawCommand.LibraryClassType == (Type)null)
+            if (parsedInput.Library == (Type)null)
             {
                 CFormat.WriteLine("This command does not exist.", ConsoleColor.Gray);
             }
             else
             {
-                Dictionary<string, MethodInfo> source1;
-                if (CommandManager._internalCommandLibraries.ContainsKey(rawCommand.LibraryClassType))
-                    source1 = CommandManager._internalCommandLibraries[rawCommand.LibraryClassType];
-                else if (CommandManager._externalCommandLibraries.ContainsKey(rawCommand.LibraryClassType))
+                Dictionary<string, MethodInfo> libraryCommands;
+                if (CommandManager.InternalLibraries.ContainsKey(parsedInput.Library))
                 {
-                    source1 = CommandManager._externalCommandLibraries[rawCommand.LibraryClassType];
+                    libraryCommands = CommandManager.InternalLibraries[parsedInput.Library];
+                }
+                else if (CommandManager.ExternalLibraries.ContainsKey(parsedInput.Library))
+                {
+                    libraryCommands = CommandManager.ExternalLibraries[parsedInput.Library];
                 }
                 else
                 {
-                    CFormat.WriteLine("This command does not exist.", ConsoleColor.Gray);
+                    CFormat.WriteLine("This command does not exist.");
                     return;
                 }
-                if (source1.Any<KeyValuePair<string, MethodInfo>>((Func<KeyValuePair<string, MethodInfo>, bool>)(i => i.Key.ToLower().Equals(rawCommand.Name.ToLower()))))
+                if (libraryCommands.Any<KeyValuePair<string, MethodInfo>>((Func<KeyValuePair<string, MethodInfo>, bool>)(i => i.Key.ToLower().Equals(parsedInput.RawCall.ToLower()))))
                 {
-                    rawCommand.Name = source1.Keys.Where<string>((Func<string, bool>)(i => i.ToLower().Equals(rawCommand.Name.ToLower()))).ToArray<string>()[0];
-                    IEnumerable<ParameterInfo> list = (IEnumerable<ParameterInfo>)((IEnumerable<ParameterInfo>)source1[rawCommand.Name].GetParameters()).ToList<ParameterInfo>();
+                    parsedInput.RawCall = libraryCommands.Keys.Where<string>((Func<string, bool>)(i => i.ToLower().Equals(parsedInput.RawCall.ToLower()))).ToArray<string>()[0];
+                    IEnumerable<ParameterInfo> list = (IEnumerable<ParameterInfo>)((IEnumerable<ParameterInfo>)libraryCommands[parsedInput.RawCall].GetParameters()).ToList<ParameterInfo>();
                     List<object> objectList = new List<object>();
                     IEnumerable<ParameterInfo> source2 = list.Where<ParameterInfo>((Func<ParameterInfo, bool>)(p => !p.IsOptional));
                     IEnumerable<ParameterInfo> source3 = list.Where<ParameterInfo>((Func<ParameterInfo, bool>)(p => p.IsOptional));
                     int num1 = source2.Count<ParameterInfo>();
                     source3.Count<ParameterInfo>();
-                    int num2 = rawCommand.Arguments.Count<string>();
+                    int num2 = parsedInput.Arguments.Count<string>();
                     if (num1 > num2)
                     {
-                        CFormat.WriteLine("Missing required argument." + Environment.NewLine + CFormat.GetArgsFormat(rawCommand.FullName, list), ConsoleColor.Gray);
+                        CFormat.WriteLine("Missing required argument." + Environment.NewLine + CFormat.GetArgsFormat(parsedInput.FullName, list), ConsoleColor.Gray);
                     }
                     else
                     {
@@ -93,13 +95,13 @@ namespace MMaster
                                 {
                                     try
                                     {
-                                        rawCommand.Arguments.ElementAt<string>(index);
+                                        parsedInput.Arguments.ElementAt<string>(index);
                                     }
                                     catch
                                     {
                                         continue;
                                     }
-                                    object obj = CFormat.CoerceArgument(parameterType, rawCommand.Arguments.ElementAt<string>(index));
+                                    object obj = CFormat.CoerceArgument(parameterType, parsedInput.Arguments.ElementAt<string>(index));
                                     objectList.RemoveAt(index);
                                     objectList.Insert(index, obj);
                                 }
@@ -115,7 +117,7 @@ namespace MMaster
                             parameters = objectList.ToArray();
                         try
                         {
-                            source1[rawCommand.Name].Invoke(null, parameters);
+                            libraryCommands[parsedInput.RawCall].Invoke(null, parameters);
                         }
                         catch (TargetInvocationException ex)
                         {

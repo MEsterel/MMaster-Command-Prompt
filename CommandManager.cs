@@ -13,37 +13,36 @@ namespace MMaster
     internal static class CommandManager
     {
         private static readonly string _externalDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static readonly CSharpCodeProvider provider = new CSharpCodeProvider();
-        internal const string _externalExtension = "*.cs";
-        internal const string _internalNamespace = "MMaster.Commands";
+        private static readonly CSharpCodeProvider _provider = new CSharpCodeProvider();
+        internal const string _ExternalExtension = "*.cs";
+        internal const string _InternalNamespace = "MMaster.Commands";
 
-        internal static Dictionary<string, Type> _internalLibraryTypes { get; private set; }
+        internal static Dictionary<string, Type> InternalLibraryCallNames { get; }
 
-        internal static Dictionary<Type, Dictionary<string, MethodInfo>> _internalCommandLibraries { get; private set; }
+        internal static Dictionary<Type, Dictionary<string, MethodInfo>> InternalLibraries { get; }
 
-        internal static Dictionary<string, Type> _externalLibraryTypes { get; private set; }
+        internal static Dictionary<string, Type> ExternalLibraryCallNames { get; }
 
-        internal static Dictionary<Type, Dictionary<string, MethodInfo>> _externalCommandLibraries { get; private set; }
+        internal static Dictionary<Type, Dictionary<string, MethodInfo>> ExternalLibraries { get; }
 
-        internal static List<FileID> _listLoadedFiles { get; private set; } = new List<FileID>();
+        internal static List<FileID> LoadedFileIDs { get; } = new List<FileID>();
 
         static CommandManager()
         {
-            CommandManager._internalLibraryTypes = new Dictionary<string, Type>((IEqualityComparer<string>)StringComparer.InvariantCultureIgnoreCase);
-            CommandManager._internalCommandLibraries = new Dictionary<Type, Dictionary<string, MethodInfo>>();
-            CommandManager._externalLibraryTypes = new Dictionary<string, Type>((IEqualityComparer<string>)StringComparer.InvariantCultureIgnoreCase);
-            CommandManager._externalCommandLibraries = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+            InternalLibraryCallNames = new Dictionary<string, Type>((IEqualityComparer<string>)StringComparer.InvariantCultureIgnoreCase);
+            InternalLibraries = new Dictionary<Type, Dictionary<string, MethodInfo>>();
+            ExternalLibraryCallNames = new Dictionary<string, Type>((IEqualityComparer<string>)StringComparer.InvariantCultureIgnoreCase);
+            ExternalLibraries = new Dictionary<Type, Dictionary<string, MethodInfo>>();
         }
 
         internal static void LoadInternalCommands()
         {
             CFormat.WriteLine("[CommandManager] Loading internal commands...");
 
-
             foreach (Type library in ((IEnumerable<Type>)Assembly.GetExecutingAssembly().GetTypes()).Where<Type>(t =>
           {
               if (t.IsClass && t.GetCustomAttributes().Where(a => a.GetType() == typeof(MMasterLibrary)).Any())
-                  return t.Namespace == _internalNamespace;
+                  return t.Namespace == _InternalNamespace;
               return false;
           }).ToList<Type>())
 
@@ -74,8 +73,8 @@ namespace MMaster
                         dictionary.Add(commandCallName, methodInfo);
                 }
 
-                _internalLibraryTypes.Add(libraryCallName, library);
-                _internalCommandLibraries.Add(library, dictionary);
+                InternalLibraryCallNames.Add(libraryCallName, library);
+                InternalLibraries.Add(library, dictionary);
             }
 
             CFormat.WriteLine("[CommandManager] Internal commands loaded.");
@@ -112,13 +111,13 @@ namespace MMaster
 
             try
             {
-                if (CommandManager._listLoadedFiles.Any<FileID>((Func<FileID, bool>)(x => x.Path == Path.Combine(Path.GetDirectoryName(path) == "" ? AppDomain.CurrentDomain.BaseDirectory : "", path))))
+                if (CommandManager.LoadedFileIDs.Any<FileID>((Func<FileID, bool>)(x => x.Path == Path.Combine(Path.GetDirectoryName(path) == "" ? AppDomain.CurrentDomain.BaseDirectory : "", path))))
                 {
                     CFormat.WriteLine("[CommandManager] Could not load file named \"" + fileName + "\" because it has already been loaded.", ConsoleColor.Red);
                 }
                 else
                 {
-                    FileID fileId = new FileID(CommandManager._listLoadedFiles.Count, path);
+                    FileID fileId = new FileID(CommandManager.LoadedFileIDs.Count, path);
 
                     CFormat.WriteLine("[CommandManager] Loading \"" + fileName + "\"...", ConsoleColor.Gray);
 
@@ -133,7 +132,7 @@ namespace MMaster
 
                     parameters.ReferencedAssemblies.Add(Assembly.GetEntryAssembly().Location);
                     CommandManager.ReferenceAssemblies(ref parameters, fileCode, fileName);
-                    CompilerResults compilerResults = CommandManager.provider.CompileAssemblyFromSource(parameters, fileCode);
+                    CompilerResults compilerResults = CommandManager._provider.CompileAssemblyFromSource(parameters, fileCode);
 
                     if ((uint)compilerResults.Errors.Count > 0U)
                     {
@@ -171,11 +170,11 @@ namespace MMaster
                                     dictionary.Add(commandCallName, methodInfo);
                             }
 
-                            _internalLibraryTypes.Add(libraryCallName, library);
-                            _internalCommandLibraries.Add(library, dictionary);
+                            InternalLibraryCallNames.Add(libraryCallName, library);
+                            InternalLibraries.Add(library, dictionary);
                         }
 
-                        CommandManager._listLoadedFiles.Add(fileId);
+                        CommandManager.LoadedFileIDs.Add(fileId);
                         if (!successMessage)
                             return;
                         CFormat.WriteLine("[CommandManager] Loaded \"" + fileName + "\" successfully!", ConsoleColor.Gray);
@@ -191,7 +190,7 @@ namespace MMaster
         internal static void LoadDirectory(string initialPath, bool successMessage = true)
         {
             string path = initialPath;
-            int count = CommandManager._externalCommandLibraries.Count;
+            int count = CommandManager.ExternalLibraries.Count;
             try
             {
                 if (string.IsNullOrEmpty(path))
@@ -202,7 +201,7 @@ namespace MMaster
                     foreach (string file in Directory.GetFiles(CommandManager._externalDirectory, "*.cs"))
                         CommandManager.LoadFile(file, successMessage);
 
-                    if (CommandManager._externalCommandLibraries.Count > count)
+                    if (CommandManager.ExternalLibraries.Count > count)
                     {
                         if (string.IsNullOrEmpty(initialPath))
                             CFormat.WriteLine("[CommandManager] External commands loaded.");
@@ -211,7 +210,6 @@ namespace MMaster
                     }
                     else
                         CFormat.WriteLine("[CommandManager] No external commands loaded.");
-
                 }
                 else
                     CFormat.WriteLine("[CommandManager] Could not find directory named \"" + Path.GetDirectoryName(path) + "\".", ConsoleColor.Red);
@@ -224,27 +222,27 @@ namespace MMaster
 
         internal static void ClearExternalCommands()
         {
-            CommandManager._externalLibraryTypes.Clear();
-            CommandManager._externalCommandLibraries.Clear();
-            CommandManager._listLoadedFiles.Clear();
+            CommandManager.ExternalLibraryCallNames.Clear();
+            CommandManager.ExternalLibraries.Clear();
+            CommandManager.LoadedFileIDs.Clear();
         }
 
         internal static void UnloadFile(int id)
         {
             try
             {
-                foreach (string type in CommandManager._listLoadedFiles[id].Types)
+                foreach (string type in CommandManager.LoadedFileIDs[id].Types)
                 {
-                    foreach (string method in CommandManager._listLoadedFiles[id].Methods)
-                        CommandManager._externalCommandLibraries[CommandManager._externalLibraryTypes[type]].Remove(method);
-                    CommandManager._externalLibraryTypes.Remove(type);
+                    foreach (string method in CommandManager.LoadedFileIDs[id].Methods)
+                        CommandManager.ExternalLibraries[CommandManager.ExternalLibraryCallNames[type]].Remove(method);
+                    CommandManager.ExternalLibraryCallNames.Remove(type);
                 }
-                CommandManager._listLoadedFiles.RemoveAll((Predicate<FileID>)(x => x.ID == id));
+                CommandManager.LoadedFileIDs.RemoveAll((Predicate<FileID>)(x => x.ID == id));
                 CFormat.WriteLine("File unloaded successfully.", ConsoleColor.Gray);
             }
             catch (Exception ex)
             {
-                CFormat.WriteLine("[CommandManager] Could not unload file \"" + CommandManager._listLoadedFiles[id].Path + "\". Details: " + ex.Message, ConsoleColor.Red);
+                CFormat.WriteLine("[CommandManager] Could not unload file \"" + CommandManager.LoadedFileIDs[id].Path + "\". Details: " + ex.Message, ConsoleColor.Red);
             }
         }
     }
