@@ -16,8 +16,8 @@ namespace MMaster
             Console.Title = Program.appName;
             CFormat.WriteLine(Program.bootMessage, ConsoleColor.Cyan);
             CFormat.JumpLine();
-            CommandsManager.LoadInternalCommands();
-            CommandsManager.LoadExternalCommands();
+            CommandManager.LoadInternalCommands();
+            CommandManager.LoadExternalCommands();
             CFormat.JumpLine();
             CFormat.WriteLine("Type 'List' to get the list of available commands.", ConsoleColor.Gray);
             Program.Run();
@@ -54,11 +54,11 @@ namespace MMaster
             else
             {
                 Dictionary<string, MethodInfo> source1;
-                if (CommandsManager._internalCommandLibraries.ContainsKey(rawCommand.LibraryClassType))
-                    source1 = CommandsManager._internalCommandLibraries[rawCommand.LibraryClassType];
-                else if (CommandsManager._externalCommandLibraries.ContainsKey(rawCommand.LibraryClassType))
+                if (CommandManager._internalCommandLibraries.ContainsKey(rawCommand.LibraryClassType))
+                    source1 = CommandManager._internalCommandLibraries[rawCommand.LibraryClassType];
+                else if (CommandManager._externalCommandLibraries.ContainsKey(rawCommand.LibraryClassType))
                 {
-                    source1 = CommandsManager._externalCommandLibraries[rawCommand.LibraryClassType];
+                    source1 = CommandManager._externalCommandLibraries[rawCommand.LibraryClassType];
                 }
                 else
                 {

@@ -5,65 +5,66 @@ using System.Text;
 
 namespace MMaster.Commands
 {
+    [MMasterLibrary("Loads internal and external commands.")]
     public static class CmdMngr
     {
         public const string _templateFileNameWithoutExtension = "MMaster Command File";
 
-        [MMasterCommand("Reload '*.cs' external commands located in the application's directory.", false)]
+        [MMasterCommand("Reload '*.cs' external commands located in the application's directory.")]
         public static void Reload()
         {
-            CommandsManager.ClearExternalCommands();
+            CommandManager.ClearExternalCommands();
             CFormat.WriteLine("[CommandManager] Cleared loaded external commands.", ConsoleColor.Gray);
-            CommandsManager.LoadExternalCommands();
+            CommandManager.LoadExternalCommands();
         }
 
-        [MMasterCommand("Load a file of external commands.", false)]
+        [MMasterCommand("Load a file of external commands.")]
         public static void LoadFile(string path)
         {
-            CommandsManager.LoadFile(path, true);
+            CommandManager.LoadFile(path, true);
         }
 
-        [MMasterCommand("Load '*.cs' files of external commands in a directory.", false)]
+        [MMasterCommand("Load '*.cs' files of external commands in a directory.")]
         public static void LoadDirectory(string path = null)
         {
-            CommandsManager.LoadDirectory(path, true);
+            CommandManager.LoadDirectory(path, true);
         }
 
-        [MMasterCommand("Unload loaded external commands.", false)]
+        [MMasterCommand("Unload loaded external commands.")]
         public static void Unload()
         {
-            CommandsManager.ClearExternalCommands();
+            CommandManager.ClearExternalCommands();
             CFormat.WriteLine("[CommandManager] Cleared loaded external commands.", ConsoleColor.Gray);
         }
 
-        [MMasterCommand("Get the list of the loaded files.", false)]
+        [MMasterCommand("Get the list of the loaded files.")]
         public static void LoadedFiles()
         {
-            if (CommandsManager._listLoadedFiles.Count == 0)
+            if (CommandManager._listLoadedFiles.Count == 0)
             {
                 CFormat.WriteLine("[CommandManager] There are no external files loaded.", ConsoleColor.Gray);
             }
             else
             {
                 CFormat.WriteLine("[CommandManager] List of loaded files: ", ConsoleColor.Gray);
-                foreach (FileID listLoadedFile in CommandsManager._listLoadedFiles)
+                foreach (FileID listLoadedFile in CommandManager._listLoadedFiles)
                     CFormat.WriteLine(string.Format("{0}({1}) {2}", (object)CFormat.Indent(2), (object)listLoadedFile.ID, (object)listLoadedFile.Path), ConsoleColor.Gray);
             }
         }
 
-        [MMasterCommand("Unload a file.", false)]
+        [MMasterCommand("Unload a file.")]
         public static void UnloadFile()
         {
             CmdMngr.LoadedFiles();
             CFormat.JumpLine();
             CFormat.WriteLine("Please enter the number ID of the file you want to unload.", ConsoleColor.Gray);
-            int id = CInput.UserPickInt(CommandsManager._listLoadedFiles.Count - 1);
+            int id = CInput.UserPickInt(CommandManager._listLoadedFiles.Count - 1);
             if (id == -1)
                 return;
-            CommandsManager.UnloadFile(id);
+            CommandManager.UnloadFile(id);
         }
 
-        [MMasterCommand("Create a template file of external commands. If path is not specified, file is saved in application's directory.", false)]
+        [MMasterCommand("Create a template file of external commands. If path is not specified, file is saved in application's directory.")]
         public static void CreateTemplate(string path = null)
         {
             try

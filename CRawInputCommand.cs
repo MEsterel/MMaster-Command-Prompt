@@ -42,7 +42,7 @@ namespace MMaster
                     string[] strArray2 = strArray1[0].Split('.');
                     if (strArray2.Length == 2)
                     {
-                        this.LibraryClassType = !CommandsManager._internalLibraryTypes.ContainsKey(strArray2[0]) ? (!CommandsManager._externalLibraryTypes.ContainsKey(strArray2[0]) ? (Type)null : CommandsManager._externalLibraryTypes[strArray2[0]]) : CommandsManager._internalLibraryTypes[strArray2[0]];
+                        this.LibraryClassType = !CommandManager._internalLibraryTypes.ContainsKey(strArray2[0]) ? (!CommandManager._externalLibraryTypes.ContainsKey(strArray2[0]) ? (Type)null : CommandManager._externalLibraryTypes[strArray2[0]]) : CommandManager._internalLibraryTypes[strArray2[0]];
                         this.Name = strArray2[1];
                     }
                 }

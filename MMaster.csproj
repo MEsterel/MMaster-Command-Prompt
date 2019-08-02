@@ -41,12 +41,13 @@
     <Compile Include="ConsoleAnswer.cs" />
     <Compile Include="ConsoleInputType.cs" />
     <Compile Include="CInput.cs" />
-    <Compile Include="CommandsManager.cs" />
+    <Compile Include="CommandManager.cs" />
     <Compile Include="CRawInputCommand.cs" />
     <Compile Include="CFormat.cs" />
     <Compile Include="FileID.cs" />
     <Compile Include="FileTemplate.cs" />
     <Compile Include="MMasterCommand.cs" />
+    <Compile Include="MMasterLibrary.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Commands\CmdMngr.cs" />
     <Compile Include="Commands\Default.cs" />
@@ -63,6 +64,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

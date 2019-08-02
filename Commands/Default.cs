@@ -7,15 +7,21 @@ using System.Threading;
 
 namespace MMaster.Commands
 {
+    [MMasterLibrary("The commands of this script can be called without the 'Default.' prefix.")]
     public static class Default
     {
         [MMasterCommand("Debug command for various tests.")]
         public static void Debug()
         {
-            CFormat.DrawProgressBar(37, 100, 30, '■');
+            CFormat.Write("Download progress: ");
+            for (int i = 0; i <= 1000; i++)
+            {
+                CFormat.DrawProgressBar(i, 1000, 47, '■', ConsoleColor.Green, ConsoleColor.DarkGray);
+                System.Threading.Thread.Sleep(1);
+            }
         }
 
-        [MMasterCommand("Get the help prompt for a specific command.", false)]
+        [MMasterCommand("Help", "Get the help prompt for a specific command.")]
         public static void Help(string command = null)
         {
             if (command == null)
@@ -32,11 +38,11 @@ namespace MMaster.Commands
                 else
                 {
                     Dictionary<string, MethodInfo> source;
-                    if (CommandsManager._internalCommandLibraries.ContainsKey(rawInput.LibraryClassType))
-                        source = CommandsManager._internalCommandLibraries[rawInput.LibraryClassType];
-                    else if (CommandsManager._externalCommandLibraries.ContainsKey(rawInput.LibraryClassType))
+                    if (CommandManager._internalCommandLibraries.ContainsKey(rawInput.LibraryClassType))
+                        source = CommandManager._internalCommandLibraries[rawInput.LibraryClassType];
+                    else if (CommandManager._externalCommandLibraries.ContainsKey(rawInput.LibraryClassType))
                     {
-                        source = CommandsManager._externalCommandLibraries[rawInput.LibraryClassType];
+                        source = CommandManager._externalCommandLibraries[rawInput.LibraryClassType];
                     }
                     else
                     {
@@ -76,18 +82,18 @@ namespace MMaster.Commands
             }
         }
 
-        [MMasterCommand("Get the list of available commands.", false)]
+        [MMasterCommand("Get the list of available commands.")]
         public static void List()
         {
             CFormat.WriteLine("For more information about a command, type 'Help <command>'.", ConsoleColor.Gray);
             CFormat.JumpLine();
             CFormat.WriteLine("[Internal commands]", ConsoleColor.Green);
-            foreach (Type index in CommandsManager._internalLibraryTypes.Values)
+            foreach (Type index in CommandManager._internalLibraryTypes.Values)
             {
-                if (CommandsManager._internalCommandLibraries[index].Values.Count != 0)
+                if (CommandManager._internalCommandLibraries[index].Values.Count != 0)
                 {
                     CFormat.WriteLine(index.Name, ConsoleColor.Yellow);
-                    foreach (MethodInfo methodInfo in CommandsManager._internalCommandLibraries[index].Values)
+                    foreach (MethodInfo methodInfo in CommandManager._internalCommandLibraries[index].Values)
                     {
                         string str = " (";
                         object[] array = ((IEnumerable<object>)methodInfo.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name == typeof(MMasterCommand).Name)).ToArray<object>();
@@ -104,14 +110,14 @@ namespace MMaster.Commands
                     CFormat.JumpLine();
                 }
             }
-            if (CommandsManager._externalLibraryTypes.Count == 0)
+            if (CommandManager._externalLibraryTypes.Count == 0)
                 return;
             CFormat.WriteLine("[External commands]", ConsoleColor.Green);
             int num = 1;
-            foreach (Type index in CommandsManager._externalLibraryTypes.Values)
+            foreach (Type index in CommandManager._externalLibraryTypes.Values)
             {
                 CFormat.WriteLine(index.Name, ConsoleColor.Yellow);
-                foreach (MethodInfo methodInfo in CommandsManager._externalCommandLibraries[index].Values)
+                foreach (MethodInfo methodInfo in CommandManager._externalCommandLibraries[index].Values)
                 {
                     string str = " (";
                     object[] array = ((IEnumerable<object>)methodInfo.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name == typeof(MMasterCommand).Name)).ToArray<object>();
@@ -125,48 +131,13 @@ namespace MMaster.Commands
                     }
                     CFormat.WriteLine(CFormat.Indent(3) + "." + methodInfo.Name + str, ConsoleColor.Gray);
                 }
-                if (num < CommandsManager._externalLibraryTypes.Values.Count)
+                if (num < CommandManager._externalLibraryTypes.Values.Count)
                     CFormat.JumpLine();
                 ++num;
             }
         }
 
-        [MMasterCommand("This command just does something.", false)]
-        public static void DoSomething()
-        {
-            CFormat.WriteLine("Don't worry this is fake. ;)", ConsoleColor.Gray);
-            CFormat.Write("Downloading A: ", ConsoleColor.Gray);
-            for (int index = 0; index < 101; ++index)
-            {
-                CFormat.DrawProgressBar((double)index, 100.0, 20, '■', ConsoleColor.Green, ConsoleColor.DarkGreen);
-                Thread.Sleep(10);
-            }
-            CFormat.JumpLine();
-            CFormat.Write("Downloading B: ", ConsoleColor.Gray);
-            for (int index = 0; index < 101; ++index)
-            {
-                CFormat.DrawProgressBar((double)index, 100.0, 20, '■', ConsoleColor.Green, ConsoleColor.DarkGreen);
-                Thread.Sleep(10);
-            }
-            CFormat.JumpLine();
-            CFormat.Write("Downloading C: ", ConsoleColor.Gray);
-            for (int index = 0; index < 101; ++index)
-            {
-                CFormat.DrawProgressBar((double)index, 100.0, 20, '■', ConsoleColor.Green, ConsoleColor.DarkGreen);
-                Thread.Sleep(10);
-            }
-            CFormat.JumpLine();
-            CFormat.Write("Installing: ", ConsoleColor.Gray);
-            for (int index = 0; index < 1001; ++index)
-            {
-                CFormat.DrawProgressBar((double)index, 1000.0, 20, '■', ConsoleColor.Green, ConsoleColor.DarkGreen);
-                Thread.Sleep(10);
-            }
-            CFormat.JumpLine();
-            CFormat.WriteLine("Done!", ConsoleColor.Gray);
-        }
-
-        [MMasterCommand("Exit the application.", false)]
+        [MMasterCommand("Exit", "Exit the application.")]
         public static void Exit()
         {
             Environment.Exit(0);

@@ -5,13 +5,13 @@ namespace MMaster
     [AttributeUsage(AttributeTargets.Method)]
     public class MMasterCommand : Attribute
     {
-        public readonly bool RequireAdminRights;
-        public readonly string HelpPrompt;
+        public string HelpPrompt { get; }
+        public string CallName { get; }
 
-        public MMasterCommand(string helpPrompt = "", bool requireAdminRights = false)
+        public MMasterCommand(string helpPrompt = "", string callName = "")
         {
-            this.RequireAdminRights = requireAdminRights;
             this.HelpPrompt = helpPrompt;
+            this.CallName = callName;
         }
     }
 }
