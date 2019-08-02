@@ -48,7 +48,7 @@ namespace MMaster.Commands
             {
                 CFormat.WriteLine("[CommandManager] List of loaded files: ", ConsoleColor.Gray);
                 foreach (FileID listLoadedFile in CommandManager._listLoadedFiles)
-                    CFormat.WriteLine(string.Format("{0}({1}) {2}", (object)CFormat.Indent(2), (object)listLoadedFile.ID, (object)listLoadedFile.Path), ConsoleColor.Gray);
+                    CFormat.WriteLine(string.Format("{0}({1}) {2}", CFormat.Indent(2), listLoadedFile.ID, listLoadedFile.Path), ConsoleColor.Gray);
             }
         }
 
@@ -86,7 +86,7 @@ namespace MMaster.Commands
                         string withoutExtension = Path.GetFileNameWithoutExtension(path);
                         while (File.Exists(path))
                         {
-                            path = Path.Combine(Path.GetDirectoryName(path), withoutExtension + " (" + (object)num + ")", Path.GetExtension(path));
+                            path = Path.Combine(Path.GetDirectoryName(path), withoutExtension + " (" + num + ")", Path.GetExtension(path));
                             ++num;
                         }
                         using (StreamWriter streamWriter = new StreamWriter(path, false, Encoding.UTF8))

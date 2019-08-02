@@ -16,13 +16,13 @@ namespace MMaster
             foreach (ParameterInfo paramInfo in ParamInfoList)
             {
                 if (!paramInfo.HasDefaultValue)
-                    stringBuilder.Append(string.Format(" <{0} {1}>", (object)paramInfo.ParameterType.ToString(), (object)paramInfo.Name));
+                    stringBuilder.Append(string.Format(" <{0} {1}>", paramInfo.ParameterType.ToString(), paramInfo.Name));
                 else if (paramInfo.DefaultValue == null)
-                    stringBuilder.Append(string.Format(" [optional {0} {1}]", (object)paramInfo.ParameterType.ToString(), (object)paramInfo.Name));
+                    stringBuilder.Append(string.Format(" [optional {0} {1}]", paramInfo.ParameterType.ToString(), paramInfo.Name));
                 else if (paramInfo.DefaultValue.GetType() == typeof(string))
-                    stringBuilder.Append(string.Format(" [optional {0} {1} = \"{2}\"]", (object)paramInfo.ParameterType.ToString(), (object)paramInfo.Name, paramInfo.DefaultValue));
+                    stringBuilder.Append(string.Format(" [optional {0} {1} = \"{2}\"]", paramInfo.ParameterType.ToString(), paramInfo.Name, paramInfo.DefaultValue));
                 else
-                    stringBuilder.Append(string.Format(" [optional {0} {1} = {2}]", (object)paramInfo.ParameterType.ToString(), (object)paramInfo.Name, paramInfo.DefaultValue));
+                    stringBuilder.Append(string.Format(" [optional {0} {1} = {2}]", paramInfo.ParameterType.ToString(), paramInfo.Name, paramInfo.DefaultValue));
             }
             return stringBuilder.ToString();
         }
@@ -30,7 +30,7 @@ namespace MMaster
         internal static object CoerceArgument(Type requiredType, string inputValue)
         {
             TypeCode typeCode = Type.GetTypeCode(requiredType);
-            string message = string.Format("Cannnot coerce the input argument {0} to required type {1}", (object)inputValue, (object)requiredType.Name);
+            string message = string.Format("Cannnot coerce the input argument {0} to required type {1}", inputValue, requiredType.Name);
             object obj;
             switch (typeCode)
             {
@@ -38,95 +38,95 @@ namespace MMaster
                     bool result1;
                     if (!bool.TryParse(inputValue, out result1))
                         throw new ArgumentException(message);
-                    obj = (object)result1;
+                    obj = result1;
                     break;
 
                 case TypeCode.Char:
                     char result2;
                     if (!char.TryParse(inputValue, out result2))
                         throw new ArgumentException(message);
-                    obj = (object)result2;
+                    obj = result2;
                     break;
 
                 case TypeCode.Byte:
                     byte result3;
                     if (!byte.TryParse(inputValue, out result3))
                         throw new ArgumentException(message);
-                    obj = (object)result3;
+                    obj = result3;
                     break;
 
                 case TypeCode.Int16:
                     short result4;
                     if (!short.TryParse(inputValue, out result4))
                         throw new ArgumentException(message);
-                    obj = (object)result4;
+                    obj = result4;
                     break;
 
                 case TypeCode.UInt16:
                     ushort result5;
                     if (!ushort.TryParse(inputValue, out result5))
                         throw new ArgumentException(message);
-                    obj = (object)result5;
+                    obj = result5;
                     break;
 
                 case TypeCode.Int32:
                     int result6;
                     if (!int.TryParse(inputValue, out result6))
                         throw new ArgumentException(message);
-                    obj = (object)result6;
+                    obj = result6;
                     break;
 
                 case TypeCode.UInt32:
                     uint result7;
                     if (!uint.TryParse(inputValue, out result7))
                         throw new ArgumentException(message);
-                    obj = (object)result7;
+                    obj = result7;
                     break;
 
                 case TypeCode.Int64:
                     long result8;
                     if (!long.TryParse(inputValue, out result8))
                         throw new ArgumentException(message);
-                    obj = (object)result8;
+                    obj = result8;
                     break;
 
                 case TypeCode.UInt64:
                     ulong result9;
                     if (!ulong.TryParse(inputValue, out result9))
                         throw new ArgumentException(message);
-                    obj = (object)result9;
+                    obj = result9;
                     break;
 
                 case TypeCode.Single:
                     float result10;
                     if (!float.TryParse(inputValue, out result10))
                         throw new ArgumentException(message);
-                    obj = (object)result10;
+                    obj = result10;
                     break;
 
                 case TypeCode.Double:
                     double result11;
                     if (!double.TryParse(inputValue, out result11))
                         throw new ArgumentException(message);
-                    obj = (object)result11;
+                    obj = result11;
                     break;
 
                 case TypeCode.Decimal:
                     Decimal result12;
                     if (!Decimal.TryParse(inputValue, out result12))
                         throw new ArgumentException(message);
-                    obj = (object)result12;
+                    obj = result12;
                     break;
 
                 case TypeCode.DateTime:
                     DateTime result13;
                     if (!DateTime.TryParse(inputValue, out result13))
                         throw new ArgumentException(message);
-                    obj = (object)result13;
+                    obj = result13;
                     break;
 
                 case TypeCode.String:
-                    obj = (object)inputValue;
+                    obj = inputValue;
                     break;
 
                 default:
@@ -163,7 +163,7 @@ namespace MMaster
                 empty2 += progressCharacter.ToString();
             CFormat.Write(empty1, primaryColor);
             CFormat.Write(empty2, secondaryColor);
-            CFormat.Write(string.Format(" {0}%", (object)(num1 * 100.0).ToString("N2")), primaryColor);
+            CFormat.Write(string.Format(" {0}%", (num1 * 100.0).ToString("N2")), primaryColor);
             Console.ResetColor();
             Console.CursorVisible = true;
             Console.CursorLeft = cursorLeft;

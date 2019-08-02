@@ -8,7 +8,7 @@ namespace MMaster
     {
         private static string[] _commandHistory = new string[1]
         {
-      ""
+            ""
         };
 
         private static bool insertMode = false;
@@ -37,6 +37,7 @@ namespace MMaster
             while (!flag2)
             {
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
+
                 if (consoleKeyInfo.Key == ConsoleKey.Enter)
                 {
                     CInput.ValidateHistory();
@@ -46,13 +47,13 @@ namespace MMaster
                     switch (inputType)
                     {
                         case ConsoleInputType.String:
-                            return (object)CInput._readBuffer;
+                            return CInput._readBuffer;
 
                         case ConsoleInputType.Int:
-                            return (object)int.Parse(CInput._readBuffer);
+                            return int.Parse(CInput._readBuffer);
 
                         case ConsoleInputType.Double:
-                            return (object)double.Parse(CInput._readBuffer.Replace(".", ","));
+                            return double.Parse(CInput._readBuffer.Replace(".", ","));
                     }
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Backspace)
@@ -105,7 +106,7 @@ namespace MMaster
                 else if (consoleKeyInfo.Key == ConsoleKey.Escape)
                 {
                     if (canEscape)
-                        return (object)null;
+                        return null;
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Insert)
                 {
@@ -224,7 +225,7 @@ namespace MMaster
                     }
                 }
             }
-            return (object)null;
+            return null;
         }
 
         public static ConsoleAnswer UserChoice(ConsoleAnswerType type)
@@ -265,7 +266,7 @@ namespace MMaster
 
         public static int UserPickInt(int maxNumber)
         {
-            object obj = CInput.ReadFromConsole("Enter a number between 0 and " + (object)maxNumber + ": ", ConsoleInputType.Int, true, maxNumber.ToString().Length, char.MinValue);
+            object obj = CInput.ReadFromConsole("Enter a number between 0 and " + maxNumber + ": ", ConsoleInputType.Int, true, maxNumber.ToString().Length, char.MinValue);
             if (obj == null)
             {
                 CFormat.WriteLine("Canceled.", ConsoleColor.Gray);
@@ -288,16 +289,17 @@ namespace MMaster
 
         private static void AddToHistory(string s)
         {
-            CInput._commandHistory = ((IEnumerable<string>)CInput._commandHistory).Concat<string>((IEnumerable<string>)new string[1]
-            {
-        s
-            }).ToArray<string>();
+            if (_commandHistory[_commandHistory.Length - 1] == s)
+                return; // Do not add a duplicate.
+
+            CInput._commandHistory = (CInput._commandHistory).Concat<string>(new string[1] { s }).ToArray<string>();
         }
 
         private static void OlderHistory()
         {
             if (CInput.historyIndex + 2 > CInput._commandHistory.Length || CInput._commandHistory.Length <= 1)
                 return;
+
             ++CInput.historyIndex;
             CInput.newReadBuffer = CInput._commandHistory[CInput._commandHistory.Length - CInput.historyIndex];
             for (int cursorPos = CInput.cursorPos; cursorPos > 0; --cursorPos)

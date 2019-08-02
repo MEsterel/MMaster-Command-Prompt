@@ -97,75 +97,94 @@ namespace MMaster
                 try
                 {
                     parameters.ReferencedAssemblies.Add(match.Groups[1].Value);
-                    CFormat.WriteLine(string.Format("[CommandManager] Found referenced assembly in \"{0}\": \"{1}\"", (object)fileName, (object)match.Groups[1].Value), ConsoleColor.Gray);
+                    CFormat.WriteLine(string.Format("[CommandManager] Found referenced assembly in \"{0}\": \"{1}\"", fileName, match.Groups[1].Value), ConsoleColor.Gray);
                 }
                 catch (Exception ex)
                 {
-                    CFormat.WriteLine(string.Format("[CommandManager] Could not load referenced assembly in {0}: \"{1}\". Details: {2}", (object)fileName, (object)match.Captures[3].Value, (object)ex.Message), ConsoleColor.Red);
+                    CFormat.WriteLine(string.Format("[CommandManager] Could not load referenced assembly in {0}: \"{1}\". Details: {2}", fileName, match.Captures[3].Value, ex.Message), ConsoleColor.Red);
                 }
             }
         }
 
         internal static void LoadFile(string path, bool successMessage = true)
         {
+            string fileName = Path.GetFileName(path);
+
             try
             {
                 if (CommandManager._listLoadedFiles.Any<FileID>((Func<FileID, bool>)(x => x.Path == Path.Combine(Path.GetDirectoryName(path) == "" ? AppDomain.CurrentDomain.BaseDirectory : "", path))))
                 {
-                    CFormat.WriteLine("[CommandManager] Could not load file named \"" + Path.GetFileName(path) + "\" because it has already been loaded.", ConsoleColor.Red);
+                    CFormat.WriteLine("[CommandManager] Could not load file named \"" + fileName + "\" because it has already been loaded.", ConsoleColor.Red);
                 }
                 else
                 {
                     FileID fileId = new FileID(CommandManager._listLoadedFiles.Count, path);
-                    CFormat.WriteLine("[CommandManager] Loading \"" + Path.GetFileName(path) + "\"...", ConsoleColor.Gray);
+
+                    CFormat.WriteLine("[CommandManager] Loading \"" + fileName + "\"...", ConsoleColor.Gray);
+
                     string fileCode = "";
                     using (StreamReader streamReader = new StreamReader(path))
                         fileCode = streamReader.ReadToEnd();
+
                     CompilerParameters parameters = new CompilerParameters()
                     {
                         GenerateInMemory = true
                     };
+
                     parameters.ReferencedAssemblies.Add(Assembly.GetEntryAssembly().Location);
-                    CommandManager.ReferenceAssemblies(ref parameters, fileCode, Path.GetFileName(path));
+                    CommandManager.ReferenceAssemblies(ref parameters, fileCode, fileName);
                     CompilerResults compilerResults = CommandManager.provider.CompileAssemblyFromSource(parameters, fileCode);
+
                     if ((uint)compilerResults.Errors.Count > 0U)
                     {
-                        CFormat.WriteLine("[CommandManager] Could not load file named \"" + Path.GetFileName(path) + "\":", ConsoleColor.Red);
+                        CFormat.WriteLine("[CommandManager] Could not load file named \"" + fileName + "\":", ConsoleColor.Red);
                         foreach (CompilerError error in (CollectionBase)compilerResults.Errors)
-                            CFormat.WriteLine(string.Format("[CommandManager] ({0},{1}): error {2}: {3}", (object)error.Line, (object)error.Column, (object)error.ErrorNumber, (object)error.ErrorText), ConsoleColor.Red);
+                            CFormat.WriteLine(string.Format("[CommandManager] ({0},{1}): error {2}: {3}", error.Line, error.Column, error.ErrorNumber, error.ErrorText), ConsoleColor.Red);
                     }
                     else
                     {
-                        foreach (Type key in ((IEnumerable<Type>)compilerResults.CompiledAssembly.GetTypes()).Where<Type>((Func<Type, bool>)(t => t.IsClass)).ToList<Type>())
+                        foreach (Type library in ((IEnumerable<Type>)compilerResults.CompiledAssembly.GetTypes()).Where<Type>((Func<Type, bool>)(t => t.IsClass)).ToList<Type>())
                         {
-                            IEnumerable<MethodInfo> methodInfos = ((IEnumerable<MethodInfo>)key.GetMethods(BindingFlags.Static | BindingFlags.Public)).Where<MethodInfo>((Func<MethodInfo, bool>)(m => ((IEnumerable<object>)m.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name.Contains(typeof(MMasterCommand).Name))).Count<object>() > 0));
+                            string libraryCallName = library.GetCustomAttribute<MMasterLibrary>().CallName;
+                            if (String.IsNullOrEmpty(libraryCallName))
+                            {
+                                libraryCallName = library.Name;
+                            }
+
+                            IEnumerable<MethodInfo> methodInfos = library.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                                                                            .Where<MethodInfo>((Func<MethodInfo, bool>)(m => ((IEnumerable<object>)m.GetCustomAttributes(false))
+                                                                            .Where<object>((Func<object, bool>)(a => a.GetType().Name.Contains(typeof(MMasterCommand).Name))).Any()));
+
                             Dictionary<string, MethodInfo> dictionary = new Dictionary<string, MethodInfo>();
+
                             foreach (MethodInfo methodInfo in methodInfos)
                             {
-                                if (dictionary.ContainsKey(methodInfo.Name))
+                                string commandCallName = methodInfo.GetCustomAttribute<MMasterCommand>().CallName;
+                                if (String.IsNullOrEmpty(commandCallName))
                                 {
-                                    CFormat.WriteLine(string.Format("[CommandManager] Could not load command named \"{0}.{1}\" because one already exists.", (object)key.Name, (object)methodInfo.Name), ConsoleColor.Red);
+                                    commandCallName = methodInfo.Name;
                                 }
+
+                                if (dictionary.ContainsKey(commandCallName))
+                                    CFormat.WriteLine(string.Format("[CommandManager] Could not load command named \"{0}.{1}\" because one already exists.", libraryCallName, commandCallName), ConsoleColor.Red);
                                 else
-                                {
-                                    dictionary.Add(methodInfo.Name, methodInfo);
-                                    fileId.Methods.Add(methodInfo.Name);
-                                }
+                                    dictionary.Add(commandCallName, methodInfo);
                             }
-                            CommandManager._externalLibraryTypes.Add(key.Name, key);
-                            CommandManager._externalCommandLibraries.Add(key, dictionary);
-                            fileId.Types.Add(key.Name);
+
+                            _internalLibraryTypes.Add(libraryCallName, library);
+                            _internalCommandLibraries.Add(library, dictionary);
                         }
+
                         CommandManager._listLoadedFiles.Add(fileId);
                         if (!successMessage)
                             return;
-                        CFormat.WriteLine("[CommandManager] Loaded \"" + Path.GetFileName(path) + "\" successfully!", ConsoleColor.Gray);
+                        CFormat.WriteLine("[CommandManager] Loaded \"" + fileName + "\" successfully!", ConsoleColor.Gray);
                     }
                 }
             }
             catch (Exception ex)
             {
-                CFormat.WriteLine("[CommandManager] Could not load file named \"" + Path.GetFileName(path) + "\": " + ex.Message, ConsoleColor.Red);
+                CFormat.WriteLine("[CommandManager] Could not load file named \"" + fileName + "\": " + ex.Message, ConsoleColor.Red);
             }
         }
 
@@ -177,19 +196,22 @@ namespace MMaster
             {
                 if (string.IsNullOrEmpty(path))
                     path = AppDomain.CurrentDomain.BaseDirectory;
+
                 if (Directory.Exists(path))
                 {
                     foreach (string file in Directory.GetFiles(CommandManager._externalDirectory, "*.cs"))
                         CommandManager.LoadFile(file, successMessage);
+
                     if (CommandManager._externalCommandLibraries.Count > count)
                     {
                         if (string.IsNullOrEmpty(initialPath))
-                            CFormat.WriteLine("[CommandManager] External commands loaded.", ConsoleColor.Gray);
+                            CFormat.WriteLine("[CommandManager] External commands loaded.");
                         else
                             CFormat.WriteLine("[CommandManager] External commands in \"" + path + "\" directory successfully loaded!", ConsoleColor.Gray);
                     }
                     else
-                        CFormat.WriteLine("[CommandManager] No external commands loaded.", ConsoleColor.Gray);
+                        CFormat.WriteLine("[CommandManager] No external commands loaded.");
+
                 }
                 else
                     CFormat.WriteLine("[CommandManager] Could not find directory named \"" + Path.GetDirectoryName(path) + "\".", ConsoleColor.Red);

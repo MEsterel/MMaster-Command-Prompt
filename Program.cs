@@ -105,7 +105,7 @@ namespace MMaster
                                 }
                                 catch (ArgumentException)
                                 {
-                                    throw new ArgumentException(string.Format("The value passed for argument '{0}' cannot be parsed to type '{1}'", (object)parameterInfo.Name, (object)parameterType.Name));
+                                    throw new ArgumentException(string.Format("The value passed for argument '{0}' cannot be parsed to type '{1}'", parameterInfo.Name, parameterType.Name));
                                 }
                             }
                         }
@@ -115,7 +115,7 @@ namespace MMaster
                             parameters = objectList.ToArray();
                         try
                         {
-                            source1[rawCommand.Name].Invoke((object)null, parameters);
+                            source1[rawCommand.Name].Invoke(null, parameters);
                         }
                         catch (TargetInvocationException ex)
                         {

@@ -21,7 +21,7 @@ namespace MMaster.Commands
             }
         }
 
-        [MMasterCommand("Help", "Get the help prompt for a specific command.")]
+        [MMasterCommand("Get the help prompt for a specific command.", "Help")]
         public static void Help(string command = null)
         {
             if (command == null)
@@ -52,8 +52,11 @@ namespace MMaster.Commands
                     if (source.Any<KeyValuePair<string, MethodInfo>>((Func<KeyValuePair<string, MethodInfo>, bool>)(i => i.Key.ToLower().Equals(rawInput.Name.ToLower()))))
                     {
                         rawInput.Name = source.Keys.Where<string>((Func<string, bool>)(i => i.ToLower().Equals(rawInput.Name.ToLower()))).ToArray<string>()[0];
+
                         MethodInfo method = rawInput.LibraryClassType.GetMethod(rawInput.Name);
+
                         object[] array = ((IEnumerable<object>)method.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name == typeof(MMasterCommand).Name)).ToArray<object>();
+
                         MMasterCommand mmasterCommand;
                         try
                         {
@@ -61,7 +64,7 @@ namespace MMaster.Commands
                         }
                         catch
                         {
-                            CFormat.WriteLine("Help: This command does not exist.", ConsoleColor.Gray);
+                            CFormat.WriteLine("Help: This command does not exist.");
                             return;
                         }
                         if (mmasterCommand.HelpPrompt == "")
@@ -73,7 +76,7 @@ namespace MMaster.Commands
                             StringBuilder stringBuilder = new StringBuilder();
                             stringBuilder.AppendLine(mmasterCommand.HelpPrompt);
                             stringBuilder.Append(CFormat.GetArgsFormat(rawInput.FullName, (IEnumerable<ParameterInfo>)method.GetParameters()));
-                            CFormat.WriteLine(stringBuilder.ToString(), ConsoleColor.Gray);
+                            CFormat.WriteLine(stringBuilder.ToString());
                         }
                     }
                     else
@@ -88,19 +91,30 @@ namespace MMaster.Commands
             CFormat.WriteLine("For more information about a command, type 'Help <command>'.", ConsoleColor.Gray);
             CFormat.JumpLine();
             CFormat.WriteLine("[Internal commands]", ConsoleColor.Green);
-            foreach (Type index in CommandManager._internalLibraryTypes.Values)
+            foreach (Type library in CommandManager._internalLibraryTypes.Values)
             {
-                if (CommandManager._internalCommandLibraries[index].Values.Count != 0)
+                if (CommandManager._internalCommandLibraries[library].Values.Count != 0)
                 {
-                    CFormat.WriteLine(index.Name, ConsoleColor.Yellow);
-                    foreach (MethodInfo methodInfo in CommandManager._internalCommandLibraries[index].Values)
+                    string libraryCallName = library.GetCustomAttribute<MMasterLibrary>().CallName;
+                    string libraryHelpPrompt = library.GetCustomAttribute<MMasterLibrary>().HelpPrompt;
+                    if (String.IsNullOrEmpty(libraryCallName))
+                    {
+                        libraryCallName = library.Name;
+                    }
+                    if (!String.IsNullOrEmpty(libraryHelpPrompt))
+                    {
+                        libraryHelpPrompt = " (" + libraryHelpPrompt + ")";
+                    }
+
+                    CFormat.WriteLine(libraryCallName + libraryHelpPrompt, ConsoleColor.Yellow);
+
+                    foreach (MethodInfo methodInfo in CommandManager._internalCommandLibraries[library].Values)
                     {
                         string str = " (";
-                        object[] array = ((IEnumerable<object>)methodInfo.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name == typeof(MMasterCommand).Name)).ToArray<object>();
+                        MMasterCommand mMasterCommand = methodInfo.GetCustomAttribute<MMasterCommand>();
                         try
                         {
-                            MMasterCommand mmasterCommand = (MMasterCommand)array[0];
-                            str = str + mmasterCommand.HelpPrompt + ")";
+                            str = str + mMasterCommand.HelpPrompt + ")";
                         }
                         catch
                         {
@@ -137,7 +151,7 @@ namespace MMaster.Commands
             }
         }
 
-        [MMasterCommand("Exit", "Exit the application.")]
+        [MMasterCommand()]
         public static void Exit()
         {
             Environment.Exit(0);
