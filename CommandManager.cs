@@ -81,10 +81,10 @@ namespace MMaster
             CFormat.JumpLine();
         }
 
-        internal static void LoadExternalCommands()
+        internal static void LoadExternalCommands(bool successMessage = false)
         {
             CFormat.WriteLine("[CommandManager] Loading external commands in application's directory (and sub-directories)...", ConsoleColor.Gray);
-            LoadDirectory("", true, false);
+            LoadDirectory("", true, successMessage);
         }
 
         private static void ReferenceAssemblies(
@@ -178,7 +178,7 @@ namespace MMaster
                         CommandManager.LoadedFileIDs.Add(fileId);
                         if (!successMessage)
                             return;
-                        CFormat.WriteLine("[CommandManager]    Loaded \"" + fileName + "\" successfully!", ConsoleColor.Gray);
+                        CFormat.WriteLine("[CommandManager]    Loaded \"" + fileName + "\" successfully!", ConsoleColor.Green);
                     }
                 }
             }

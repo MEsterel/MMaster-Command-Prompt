@@ -18,7 +18,7 @@ namespace MMaster
             CFormat.WriteLine(Program.bootMessage, ConsoleColor.Cyan);
             CFormat.JumpLine();
             CommandManager.LoadInternalCommands();
-            CommandManager.LoadExternalCommands();
+            CommandManager.LoadExternalCommands(true);
             CFormat.JumpLine();
             CFormat.WriteLine("Type 'List' to get the list of available commands.", ConsoleColor.Gray);
             Program.Run();
