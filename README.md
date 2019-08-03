@@ -13,7 +13,7 @@ Building a command for the MMaster command prompt is so easy that it almost **wo
 
 ## Pre-built command line tools
 
-Thanks to the implemented CFormat and CInput classes, **you don't have to think about the user-experience**: managed color writing, password masking, int picking, Yes/No questions and more!
+Thanks to the implemented CFormat and CInput classes, **you don't have to think about the user-experience**: managed color writing, automatic tab completition, password masking, int picking, Yes/No/Cancel questions and more!
 
 ## Lite & portable
 
