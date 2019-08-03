@@ -53,7 +53,7 @@ namespace MMaster
             {
                 Library = typeof(Default);
 
-                if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[0]))
+                if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[0].ToLower()))
                 {
                     CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[0]);
                     CommandMethodInfo = CommandManager.InternalLibraries[Library][CommandCallName];
@@ -69,9 +69,9 @@ namespace MMaster
                 {
                     Library = CommandManager.InternalLibraryCallNames[splitCall[0]];
 
-                    if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[1]))
+                    if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[1].ToLower()))
                     {
-                        CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[1]);
+                        CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[1].ToLower());
                         CommandMethodInfo = CommandManager.InternalLibraries[Library][CommandCallName];
                     }
                     else
@@ -83,9 +83,9 @@ namespace MMaster
                 {
                     Library = CommandManager.ExternalLibraryCallNames[splitCall[0]];
 
-                    if (CommandManager.ExternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[1]))
+                    if (CommandManager.ExternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[1].ToLower()))
                     {
-                        CommandCallName = CommandManager.ExternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[1]);
+                        CommandCallName = CommandManager.ExternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[1].ToLower());
                         CommandMethodInfo = CommandManager.ExternalLibraries[Library][CommandCallName];
                     }
                     else

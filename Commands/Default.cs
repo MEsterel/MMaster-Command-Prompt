@@ -7,7 +7,7 @@ using System.Text;
 
 namespace MMaster.Commands
 {
-    [MMasterLibrary("The commands of this library can be called without the 'Default.' prefix.")]
+    [MMasterLibrary("The commands of this library can be called without the '_default.' prefix.","_default")]
     public static class Default
     {
         [MMasterCommand("Debug command for various tests.")]
@@ -99,10 +99,10 @@ namespace MMaster.Commands
             CFormat.WriteLine("[External commands]", ConsoleColor.Green);
             int num = 1;
 
-            foreach (Type index in CommandManager.ExternalLibraryCallNames.Values)
+            foreach (Type library in CommandManager.ExternalLibraryCallNames.Values)
             {
-                CFormat.WriteLine(index.Name, ConsoleColor.Yellow);
-                foreach (MethodInfo methodInfo in CommandManager.ExternalLibraries[index].Values)
+                CFormat.WriteLine(library.Name, ConsoleColor.Yellow);
+                foreach (MethodInfo methodInfo in CommandManager.ExternalLibraries[library].Values)
                 {
                     MMasterCommand mMasterCommand = methodInfo.GetCustomAttribute<MMasterCommand>();
                     string helpPrompt = mMasterCommand.HelpPrompt;

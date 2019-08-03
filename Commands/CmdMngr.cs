@@ -15,6 +15,7 @@ namespace MMaster.Commands
         {
             CommandManager.ClearExternalCommands();
             CFormat.WriteLine("[CommandManager] Cleared loaded external commands.", ConsoleColor.Gray);
+            CFormat.JumpLine();
             CommandManager.LoadExternalCommands();
         }
 
@@ -25,9 +26,9 @@ namespace MMaster.Commands
         }
 
         [MMasterCommand("Load '*.cs' files of external commands in a directory.")]
-        public static void LoadDirectory(string path = null)
+        public static void LoadDirectory(string path = null, bool subdirectories = false)
         {
-            CommandManager.LoadDirectory(path, true);
+            CommandManager.LoadDirectory(path, subdirectories, true);
         }
 
         [MMasterCommand("Unload loaded external commands.")]
