@@ -8,5 +8,6 @@
         True,
         False,
         Undefined,
+        Escaped
     }
 }

@@ -171,7 +171,7 @@ namespace MMaster
 
         public static void JumpLine()
         {
-            CFormat.WriteLine("", ConsoleColor.Gray);
+            CFormat.WriteLine("");
         }
 
         public static void WriteLine(string text, ConsoleColor color = ConsoleColor.Gray)

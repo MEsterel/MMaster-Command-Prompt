@@ -22,7 +22,10 @@ namespace MMaster
         {
             get
             {
-                return CommandManager.InternalLibraryCallNames.FirstOrDefault(x => x.Value == Library).Key;
+                if (CommandManager.InternalLibraries.ContainsKey(Library))
+                    return CommandManager.InternalLibraryCallNames.FirstOrDefault(x => x.Value == Library).Key;
+                else
+                    return CommandManager.ExternalLibraryCallNames.FirstOrDefault(x => x.Value == Library).Key;
             }
         }
 
@@ -55,7 +58,7 @@ namespace MMaster
 
                 if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[0].ToLower()))
                 {
-                    CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[0]);
+                    CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[0].ToLower());
                     CommandMethodInfo = CommandManager.InternalLibraries[Library][CommandCallName];
                 }
                 else
@@ -162,6 +165,22 @@ namespace MMaster
                     if (objectList.Count > 0)
                         Parameters = objectList.ToArray();
                 }
+            }
+        }
+
+        internal static Type ParseLibrary(string userInput)
+        {
+            if (CommandManager.InternalLibraryCallNames.Keys.Any(x => x.ToLower() == userInput.ToLower()))
+            {
+                return CommandManager.InternalLibraryCallNames.FirstOrDefault(x => x.Key.ToLower() == userInput.ToLower()).Value;
+            }
+            else if (CommandManager.ExternalLibraryCallNames.Keys.Any(x => x.ToLower() == userInput.ToLower()))
+            {
+                return CommandManager.ExternalLibraryCallNames.FirstOrDefault(x => x.Key.ToLower() == userInput.ToLower()).Value;
+            }
+            else
+            {
+                return null;
             }
         }
     }

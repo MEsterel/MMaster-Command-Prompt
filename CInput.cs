@@ -1,5 +1,7 @@
-﻿using System;
+﻿using MMaster.Commands;
+using System;
 using System.Linq;
+using System.Reflection;
 
 namespace MMaster
 {
@@ -16,6 +18,7 @@ namespace MMaster
         private static string newReadBuffer = "";
         internal const string _badCommandMessage = "This command does not exist.";
         private static int cursorPos;
+        private static bool tabAllowed;
 
         public static object ReadFromConsole(
           string promptMessage = "",
@@ -25,24 +28,28 @@ namespace MMaster
           char charMask = '\0')
         {
             ConsoleColor foregroundColor = Console.ForegroundColor;
-            bool flag1 = charMask > char.MinValue;
-            bool flag2 = false;
-            string str1 = promptMessage == "" ? "MMaster> " : promptMessage;
-            CInput.cursorPos = 0;
-            CInput.historyIndex = 0;
-            CInput._readBuffer = "";
+            bool maskFlag = charMask > char.MinValue;
+            bool runFlag = true;
+            promptMessage = promptMessage == "" ? "MMaster> " : promptMessage;
+            cursorPos = 0;
+            historyIndex = 0;
+            tabAllowed = true;
+            _readBuffer = "";
             Console.ForegroundColor = ConsoleColor.White;
-            Console.Write(str1);
-            while (!flag2)
+            Console.Write(promptMessage);
+
+            while (runFlag)
             {
                 ConsoleKeyInfo consoleKeyInfo = Console.ReadKey(true);
 
+
+                // READ BUFFER
                 if (consoleKeyInfo.Key == ConsoleKey.Enter)
                 {
                     CInput.ValidateHistory();
                     CInput.AddToHistory(CInput._readBuffer);
                     Console.ForegroundColor = foregroundColor;
-                    CFormat.WriteLine("", ConsoleColor.Gray);
+                    CFormat.JumpLine();
                     switch (inputType)
                     {
                         case ConsoleInputType.String:
@@ -123,6 +130,87 @@ namespace MMaster
                     else if (consoleKeyInfo.Key == ConsoleKey.DownArrow)
                         CInput.NewerHistory();
                 }
+                // Tab auto-completition
+                else if (consoleKeyInfo.Key == ConsoleKey.Tab)
+                {
+                    if (String.IsNullOrEmpty(_readBuffer) || !tabAllowed || _readBuffer.Contains(" "))
+                        continue;
+
+                    if (!_readBuffer.Contains(".")) // If looking for a library OR default command
+                    {
+                        //Try internal libraries first
+                        string result = CommandManager.InternalLibraryCallNames.Keys.FirstOrDefault(x => x.ToLower().StartsWith(_readBuffer.ToLower()));
+                        //Then try external libraries
+                        if (result == null)
+                        {
+                            result = CommandManager.ExternalLibraryCallNames.Keys.FirstOrDefault(x => x.ToLower().StartsWith(_readBuffer.ToLower()));
+                        }
+                        // If still null, no result at all in libraries
+                        if (result != null)
+                        {
+                            for (int i = 0; i < _readBuffer.Length; i++)
+                            {
+                                MoveCursorBack();
+                            }
+                            UserWrite(result);
+                            _readBuffer = result;
+                        }
+
+                        // Then trying in Default library, the only one that can be called without library.
+                        result = CommandManager.InternalLibraries[typeof(Default)].Keys.FirstOrDefault(x => x.ToLower().StartsWith(_readBuffer.ToLower()));
+
+                        if (result == null)
+                            continue;
+                        else
+                        {
+                            for (int i = 0; i < _readBuffer.Length; i++)
+                            {
+                                MoveCursorBack();
+                            }
+                            UserWrite(result);
+                            _readBuffer = result;
+                        }
+                    }
+                    else // If the buffer contains a point.
+                    {
+                        // PARSE LIBRARY
+                        Type library = CParsedInput.ParseLibrary(_readBuffer.Split('.')[0]);
+                        string commandInputLower = _readBuffer.Split('.')[1].ToLower();
+
+                        if (library == null || commandInputLower == "")
+                            continue;
+
+                        // Try internal libraries
+                        string result = null;
+                        if (CommandManager.InternalLibraries.ContainsKey(library))
+                        {
+                            result = CommandManager.InternalLibraries[library].Keys.FirstOrDefault(x => x.ToLower().StartsWith(commandInputLower));
+                        }
+                        // Then try external
+                        else
+                        {
+                            result = CommandManager.ExternalLibraries[library].Keys.FirstOrDefault(x => x.ToLower().StartsWith(commandInputLower));
+                        }
+
+                        // If result found
+                        if (result != null)
+                        {
+                            for (int i = 0; i < _readBuffer.Length; i++)
+                            {
+                                MoveCursorBack();
+                            }
+
+                            string libraryCallName = library.GetCustomAttribute<MMasterLibrary>().CallName;
+                            UserWrite(libraryCallName + "." + result);
+                            _readBuffer = libraryCallName + "." + result;
+                        }
+
+
+                        
+                    }
+
+                    continue;
+                }
                 else
                 {
                     CInput.ValidateHistory();
@@ -182,7 +270,7 @@ namespace MMaster
                                     break;
                                 continue;
                         }
-                        if (CInput.cursorPos != CInput._readBuffer.Length && !CInput.insertMode)
+                        if (CInput.cursorPos != CInput._readBuffer.Length && !CInput.insertMode) // If in the word, insert mode off
                         {
                             string str2 = CInput._readBuffer.Substring(0, CInput.cursorPos);
                             keyChar = consoleKeyInfo.KeyChar;
@@ -190,7 +278,7 @@ namespace MMaster
                             string str4 = CInput._readBuffer.Substring(CInput.cursorPos, CInput._readBuffer.Length - CInput.cursorPos);
                             CInput._readBuffer = str2 + str3 + str4;
                         }
-                        else if (CInput.cursorPos != CInput._readBuffer.Length && CInput.insertMode)
+                        else if (CInput.cursorPos != CInput._readBuffer.Length && CInput.insertMode) // If in the word, insert mode on
                         {
                             string str2 = CInput._readBuffer.Substring(0, CInput.cursorPos);
                             keyChar = consoleKeyInfo.KeyChar;
@@ -205,7 +293,10 @@ namespace MMaster
                             string str2 = keyChar.ToString();
                             CInput._readBuffer = readBuffer + str2;
                         }
-                        if (flag1)
+
+
+                        // PRINT TO SCREEN
+                        if (maskFlag)
                         {
                             CInput.UserWrite(charMask.ToString());
                         }
@@ -227,38 +318,57 @@ namespace MMaster
             return null;
         }
 
-        public static ConsoleAnswer UserChoice(ConsoleAnswerType type)
+        public static ConsoleAnswer UserChoice(ConsoleAnswerType type, bool canEscape = false)
         {
             switch (type)
             {
                 case ConsoleAnswerType.YesNo:
-                    string lower1 = CInput.ReadFromConsole("(YES / NO): ", ConsoleInputType.String, false, -1, char.MinValue).ToString().ToLower();
-                    if (lower1.ToLower() == "y" || lower1.ToLower() == "yes")
+                    object object1 = CInput.ReadFromConsole("(YES / NO): ", ConsoleInputType.String, canEscape, 3, char.MinValue);
+                    if (object1 == null)
+                    {
+                        CFormat.WriteLine("[Canceled]", ConsoleColor.DarkYellow);
+                        return ConsoleAnswer.Escaped;
+                    }
+                    string str1 = object1.ToString().ToLower();
+                    if (str1 == "y" || str1 == "yes")
                         return ConsoleAnswer.Yes;
-                    if (lower1.ToLower() == "n" || lower1.ToLower() == "no")
+                    if (str1 == "n" || str1 == "no")
                         return ConsoleAnswer.No;
                     return CInput.UserChoice(type);
+                    
 
                 case ConsoleAnswerType.YesNoCancel:
-                    string lower2 = CInput.ReadFromConsole("(YES / NO / CANCEL): ", ConsoleInputType.String, false, -1, char.MinValue).ToString().ToLower();
-                    if (lower2.ToLower() == "y" || lower2.ToLower() == "yes")
+                    object object2 = CInput.ReadFromConsole("(YES / NO / CANCEL): ", ConsoleInputType.String, canEscape, 6, char.MinValue);
+                    if (object2 == null)
+                    {
+                        CFormat.WriteLine("[Canceled]", ConsoleColor.DarkYellow);
+                        return ConsoleAnswer.Escaped;
+                    }
+                    string str2 = object2.ToString().ToLower();
+                    if (str2 == "y" || str2 == "yes")
                         return ConsoleAnswer.Yes;
-                    if (lower2.ToLower() == "n" || lower2.ToLower() == "no")
+                    if (str2 == "n" || str2 == "no")
                         return ConsoleAnswer.No;
-                    if (lower2.ToLower() == "c" || lower2.ToLower() == "cancel")
+                    if (str2 == "c" || str2 == "cancel")
                         return ConsoleAnswer.Cancel;
                     return CInput.UserChoice(type);
 
                 case ConsoleAnswerType.TrueFalse:
-                    string lower3 = CInput.ReadFromConsole("(TRUE / FALSE): ", ConsoleInputType.String, false, -1, char.MinValue).ToString().ToLower();
-                    if (lower3.ToLower() == "t" || lower3.ToLower() == "true")
+                    object object3 = CInput.ReadFromConsole("(TRUE / FALSE): ", ConsoleInputType.String, canEscape, 5, char.MinValue);
+                    if (object3 == null)
+                    {
+                        CFormat.WriteLine("[Canceled]", ConsoleColor.DarkYellow);
+                        return ConsoleAnswer.Escaped;
+                    }
+                    string str3 = object3.ToString().ToLower();
+                    if (str3 == "t" || str3 == "true")
                         return ConsoleAnswer.Yes;
-                    if (lower3.ToLower() == "f" || lower3.ToLower() == "false")
+                    if (str3 == "f" || str3 == "false")
                         return ConsoleAnswer.No;
                     return CInput.UserChoice(type);
 
                 default:
-                    CFormat.WriteLine("Could not get user choice, specifed answer type does not exist.", ConsoleColor.Red);
+                    CFormat.WriteLine("[CInput] ERROR: Could not get user choice, specifed answer type does not exist.", ConsoleColor.Red);
                     return ConsoleAnswer.Undefined;
             }
         }
@@ -268,7 +378,7 @@ namespace MMaster
             object obj = CInput.ReadFromConsole("Enter a number between 0 and " + maxNumber + ": ", ConsoleInputType.Int, true, maxNumber.ToString().Length, char.MinValue);
             if (obj == null)
             {
-                CFormat.WriteLine("Canceled.", ConsoleColor.Gray);
+                CFormat.WriteLine("[Canceled]", ConsoleColor.DarkYellow);
                 return -1;
             }
             if ((int)obj >= 0 && (int)obj <= maxNumber)
@@ -279,7 +389,7 @@ namespace MMaster
 
         private static void ValidateHistory()
         {
-            if (!(CInput.newReadBuffer != ""))
+            if (CInput.newReadBuffer == "")
                 return;
             CInput._readBuffer = CInput.newReadBuffer;
             CInput.historyIndex = 0;

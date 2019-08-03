@@ -5,33 +5,29 @@
 // REF "System.Windows.Forms.dll"
 // Reference other assemblies with REF comments as above
 
-using MMaster; // Must be implemented
-using System.Windows.Forms;
+using MMaster; // /!\ MUST BE IMPLEMENTED! /!\
+using System;
 
 namespace MyNamespace
 {
-    public static class CommandClass
+    // Mandatory library attribute vvv
+    [MMasterLibrary("This is the help prompt of this library.", "Library")] // ARGS : HelpPrompt, CallName. Both of these args are optional.
+    public class Library
     {
-        [MMasterCommand("Shows a message box.")] // MMaster command declaration attribute: [MMasterCommand([string help = ""],[bool requiresAdminRights = false])]
-        public static void CommandName(string message = null) // Call this command with 'CommandClass.CommandName'
+        // Mandatory command attribute vvv
+        [MMasterCommand("Prints Hello!", "Command")] // ARGS : HelpPrompt, CallName. Both of these args are optional.
+        public static void Command(string message) // Call this command with 'Library.Command'
         {
             // Edit code here
-            Application.EnableVisualStyles();
-
-            if (message == null)
-            {
-                message = CInput.ReadFromConsole("Message to print: ").ToString();
-            }
-
-            MessageBox.Show(message);
+            CFormat.WriteLine("Hello " + message + "!", ConsoleColor.Blue);
         }
     }
 }
 
 /// <information>
-/// MMASTER AVAILABLE METHODS:
+/// MMASTER AVAILABLE STATIC METHODS:
 ///
-///- static object CInput.ReadFromConsole(string promptMessage = "", ConsoleInputType inputType = ConsoleInputType.String, bool canEscape = false, int maxChars = -1, char charMask = Char.MinValue)
+///- object CInput.ReadFromConsole(string promptMessage = "", ConsoleInputType inputType = ConsoleInputType.String, bool canEscape = false, int maxChars = -1, char charMask = Char.MinValue)
 ///		Returns a user input as an object (return = string (by default)/int/double).
 ///		promptMessage (optional): prompt to show before user input.
 ///		inputType (optional): type of the input (inputType = ConsoleInputType.String/ConsoleInputType.Int/ConsoleInputType.Double).
@@ -39,23 +35,28 @@ namespace MyNamespace
 ///		maxChars (optional): number of maximum chars (if maxChars < 1, this parameter is ignored).
 ///		charMask (optional): replace characters with a specific char.
 ///
-///- static ConsoleAnswer CInput.UserChoice(ConsoleAnswerType type)
-///		Returns a user choice among options (return = ConsoleAnswer.Yes/ConsoleAnswer.No/ConsoleAnswer.Cancel/ConsoleAnswer.True/ConsoleAnswer.False).
+///- ConsoleAnswer CInput.UserChoice(ConsoleAnswerType type, bool canEscape = false)
+///		Returns a user choice among options (return = ConsoleAnswer.Yes/ConsoleAnswer.No/ConsoleAnswer.Cancel/ConsoleAnswer.True/ConsoleAnswer.False/ConsoleAnswer.Escaped/ConsoleAnswer.Undefined(in case of error)).
 ///		type: type of options (type = ConsoleAnswerType.YesNo/ConsoleAnswerType.YesNoCancel/ConsoleAnswerType.TrueFalse)
 ///
-///- static int UserPickInt(int maxNumber)
+///- int CInput.UserPickInt(int maxNumber)
 ///		Returns a picked number between 0 and maxNumber.
 ///		maxNumber: maximum number available for choice.
 ///
-///- static string CFormat.Indent(int nb)
+///- string CFormat.Indent(int nb)
 ///		Returns a string of white spaces (nb * white space).
 ///
-///- static void CFormat.JumpLine()
+///- void CFormat.JumpLine()
 ///		Simply jumps a line.
 ///
-///- static void CFormat.WriteLine(string text, ConsoleColor color = ConsoleColor.Gray)
+///- void CFormat.WriteLine(string text, ConsoleColor color = ConsoleColor.Gray)
 ///		Writes a line. It can be colored.
 ///		text: message to print.
+///		color (optional): color of the line.
+///		
+/// - void CFormat.WriteLine(ConsoleColor color, params string[] text)
+///		Writes as many colored lines as you want.
+///		text: message to print (infinite argument, ad as many lines as you want).
 ///		color (optional): color of the line.
 ///
 ///- static void CFormat.Write(string text, ConsoleColor color = ConsoleColor.Gray)

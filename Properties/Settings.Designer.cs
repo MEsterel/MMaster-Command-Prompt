@@ -28,46 +28,50 @@ namespace MMaster.Properties {
         [global::System.Configuration.DefaultSettingValueAttribute("// MMASTER COMMAND FILE TEMPLATE\r\n// MMaster (c) 2017-2019 Matthieu Badoy. All ri" +
             "ghts reserved.\r\n// ----------------------------------------------------------\r\n\r" +
             "\n// REF \"System.Windows.Forms.dll\"\r\n// Reference other assemblies with REF comme" +
-            "nts as above\r\n\r\nusing MMaster; // Must be implemented\r\nusing System;\r\nusing Syst" +
-            "em.Windows.Forms;\r\n\r\nnamespace MyNamespace\r\n{                \r\n\tpublic static cl" +
-            "ass CommandClass\r\n\t{\t\t\r\n\t\t[MMasterCommand(\"Shows a message box.\")] // MMaster co" +
-            "mmand declaration attribute: [MMasterCommand([string help = \"\"],[bool requiresAd" +
-            "minRights = false])]\r\n\t\tpublic static void CommandName(string message = null) //" +
-            " Call this command with \'CommandClass.CommandName\'\r\n\t\t{\r\n\t\t\t// Edit code here\r\n\t" +
-            "\t\tApplication.EnableVisualStyles();\r\n\t\t\t\r\n\t\t\tif (message == null)\r\n\t\t\t{\r\n\t\t\t\tmes" +
-            "sage = CInput.ReadFromConsole(\"Message to print: \").ToString();\r\n\t\t\t}\r\n\r\n\t\t\tMess" +
-            "ageBox.Show(message);\r\n\t\t}\r\n\t}\r\n}\r\n\r\n/// <information>\r\n/// MMASTER AVAILABLE ME" +
-            "THODS:\r\n///\r\n///- static object CInput.ReadFromConsole(string promptMessage = \"\"" +
-            ", ConsoleInputType inputType = ConsoleInputType.String, bool canEscape = false, " +
-            "int maxChars = -1, char charMask = Char.MinValue)\r\n///\t\tReturns a user input as " +
-            "an object (return = string (by default)/int/double).\r\n///\t\tpromptMessage (option" +
-            "al): prompt to show before user input.\r\n///\t\tinputType (optional): type of the i" +
-            "nput (inputType = ConsoleInputType.String/ConsoleInputType.Int/ConsoleInputType." +
-            "Double).\r\n///\t\tcanEscape (optional): if true and if the users presses ESCAPE, it" +
-            " escapes the Read and returns null.\r\n///\t\tmaxChars (optional): number of maximum" +
-            " chars (if maxChars < 1, this parameter is ignored).\r\n///\t\tcharMask (optional): " +
-            "replace characters with a specific char.\r\n///\r\n///- static ConsoleAnswer CInput." +
-            "UserChoice(ConsoleAnswerType type)\r\n///\t\tReturns a user choice among options (re" +
-            "turn = ConsoleAnswer.Yes/ConsoleAnswer.No/ConsoleAnswer.Cancel/ConsoleAnswer.Tru" +
-            "e/ConsoleAnswer.False).\r\n///\t\ttype: type of options (type = ConsoleAnswerType.Ye" +
-            "sNo/ConsoleAnswerType.YesNoCancel/ConsoleAnswerType.TrueFalse)\r\n///\r\n///- static" +
-            " int UserPickInt(int maxNumber)\r\n///\t\tReturns a picked number between 0 and maxN" +
-            "umber.\r\n///\t\tmaxNumber: maximum number available for choice.\r\n///\r\n///- static s" +
-            "tring CFormat.Indent(int nb)\r\n///\t\tReturns a string of white spaces (nb * white " +
-            "space).\r\n///\r\n///- static void CFormat.JumpLine()\r\n///\t\tSimply jumps a line.\r\n//" +
-            "/\r\n///- static void WriteLine(string text, ConsoleColor color = ConsoleColor.Gra" +
-            "y)\r\n///\t\tWrites a line. It can be colored.\r\n///\t\ttext: message to print.\r\n///\t\tc" +
-            "olor (optional): color of the line.\r\n///\r\n///- static void Write(string text, Co" +
-            "nsoleColor color = ConsoleColor.Gray)\r\n///\t\tWrites text. It can be colored.\r\n///" +
-            "\t\ttext: message to print.\r\n///\t\tcolor (optional): color of the line.\r\n///\r\n///- " +
-            "static void DrawProgressBar(double complete, double maxVal, int barSize, char pr" +
-            "ogressCharacter, ConsoleColor primaryColor = ConsoleColor.Green,\r\n///          C" +
-            "onsoleColor secondaryColor = ConsoleColor.DarkGreen)\r\n///\t\tDraws a progress bar." +
-            "\r\n///\t\tcomplete: value of the progression.\r\n///\t\tmaxVal: max value of the progre" +
-            "ssion.\r\n///\t\tbarSize: size of the progress bar in number of chars.\r\n///\t\tprogres" +
-            "sCharacter: char to draw the progress bar with (recommanded: ■).\r\n///\t\tprimaryCo" +
-            "lor (optional): foreground color of the progress bar.\r\n///\t\tsecondaryColor (opti" +
-            "onal): background color of the progress bar.\r\n/// </information>")]
+            "nts as above\r\n\r\nusing MMaster; // /!\\ MUST BE IMPLEMENTED! /!\\\r\nusing System;\r\n\r" +
+            "\nnamespace MyNamespace\r\n{\r\n    // Mandatory library attribute vvv\r\n    [MMasterL" +
+            "ibrary(\"This is the help prompt of this library.\", \"Library\")] // ARGS : HelpPro" +
+            "mpt, CallName. Both of these args are optional.\r\n    class Library\r\n    {\r\n     " +
+            "   // Mandatory command attribute vvv\r\n        [MMasterCommand(\"Prints Hello!\", " +
+            "\"Command\")] // ARGS : HelpPrompt, CallName. Both of these args are optional.\r\n  " +
+            "      static void Command(string message) // Call this command with \'Library.Com" +
+            "mand\'\r\n        {\r\n            // Edit code here\r\n            CFormat.WriteLine(\"" +
+            "Hello \" + message + \"!\", ConsoleColor.Blue);\r\n        }\r\n    }\r\n}\r\n\r\n/// <inform" +
+            "ation>\r\n/// MMASTER AVAILABLE STATIC METHODS:\r\n///\r\n///- object CInput.ReadFromC" +
+            "onsole(string promptMessage = \"\", ConsoleInputType inputType = ConsoleInputType." +
+            "String, bool canEscape = false, int maxChars = -1, char charMask = Char.MinValue" +
+            ")\r\n///\t\tReturns a user input as an object (return = string (by default)/int/doub" +
+            "le).\r\n///\t\tpromptMessage (optional): prompt to show before user input.\r\n///\t\tinp" +
+            "utType (optional): type of the input (inputType = ConsoleInputType.String/Consol" +
+            "eInputType.Int/ConsoleInputType.Double).\r\n///\t\tcanEscape (optional): if true and" +
+            " if the users presses ESCAPE, it escapes the Read and returns null.\r\n///\t\tmaxCha" +
+            "rs (optional): number of maximum chars (if maxChars < 1, this parameter is ignor" +
+            "ed).\r\n///\t\tcharMask (optional): replace characters with a specific char.\r\n///\r\n/" +
+            "//- ConsoleAnswer CInput.UserChoice(ConsoleAnswerType type)\r\n///\t\tReturns a user" +
+            " choice among options (return = ConsoleAnswer.Yes/ConsoleAnswer.No/ConsoleAnswer" +
+            ".Cancel/ConsoleAnswer.True/ConsoleAnswer.False).\r\n///\t\ttype: type of options (ty" +
+            "pe = ConsoleAnswerType.YesNo/ConsoleAnswerType.YesNoCancel/ConsoleAnswerType.Tru" +
+            "eFalse)\r\n///\r\n///- int CInput.UserPickInt(int maxNumber)\r\n///\t\tReturns a picked " +
+            "number between 0 and maxNumber.\r\n///\t\tmaxNumber: maximum number available for ch" +
+            "oice.\r\n///\r\n///- string CFormat.Indent(int nb)\r\n///\t\tReturns a string of white s" +
+            "paces (nb * white space).\r\n///\r\n///- void CFormat.JumpLine()\r\n///\t\tSimply jumps " +
+            "a line.\r\n///\r\n///- void CFormat.WriteLine(string text, ConsoleColor color = Cons" +
+            "oleColor.Gray)\r\n///\t\tWrites a line. It can be colored.\r\n///\t\ttext: message to pr" +
+            "int.\r\n///\t\tcolor (optional): color of the line.\r\n///\t\t\r\n/// - void CFormat.Write" +
+            "Line(ConsoleColor color, params string[] text)\r\n///\t\tWrites as many colored line" +
+            "s as you want.\r\n///\t\ttext: message to print (infinite argument, ad as many lines" +
+            " as you want).\r\n///\t\tcolor (optional): color of the line.\r\n///\r\n///- static void" +
+            " CFormat.Write(string text, ConsoleColor color = ConsoleColor.Gray)\r\n///\t\tWrites" +
+            " text. It can be colored.\r\n///\t\ttext: message to print.\r\n///\t\tcolor (optional): " +
+            "color of the line.\r\n///\r\n///- static void CFormat.DrawProgressBar(double complet" +
+            "e, double maxVal, int barSize, char progressCharacter, ConsoleColor primaryColor" +
+            " = ConsoleColor.Green,\r\n///          ConsoleColor secondaryColor = ConsoleColor." +
+            "DarkGreen)\r\n///\t\tDraws a progress bar.\r\n///\t\tcomplete: value of the progression." +
+            "\r\n///\t\tmaxVal: max value of the progression.\r\n///\t\tbarSize: size of the progress" +
+            " bar in number of chars.\r\n///\t\tprogressCharacter: char to draw the progress bar " +
+            "with (recommanded: ■).\r\n///\t\tprimaryColor (optional): foreground color of the pr" +
+            "ogress bar.\r\n///\t\tsecondaryColor (optional): background color of the progress ba" +
+            "r.\r\n/// </information>\r\n")]
         public string FileTemplate {
             get {
                 return ((string)(this["FileTemplate"]));

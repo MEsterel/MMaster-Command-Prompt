@@ -141,13 +141,13 @@ namespace MMaster
                     };
 
                     parameters.ReferencedAssemblies.Add(Assembly.GetEntryAssembly().Location);
-                    CommandManager.ReferenceAssemblies(ref parameters, fileCode, fileName);
-                    CompilerResults compilerResults = CommandManager._provider.CompileAssemblyFromSource(parameters, fileCode);
+                    ReferenceAssemblies(ref parameters, fileCode, fileName);
+                    CompilerResults compilerResults = _provider.CompileAssemblyFromSource(parameters, fileCode);
 
                     if ((uint)compilerResults.Errors.Count > 0U)
                     {
                         CFormat.WriteLine("[CommandManager]    Could not load file named \"" + fileName + "\":", ConsoleColor.Red);
-                        foreach (CompilerError error in (CollectionBase)compilerResults.Errors)
+                        foreach (CompilerError error in compilerResults.Errors)
                             CFormat.WriteLine(string.Format("[CommandManager]    ({0},{1}): error {2}: {3}", error.Line, error.Column, error.ErrorNumber, error.ErrorText), ConsoleColor.Red);
                     }
                     else
@@ -169,7 +169,7 @@ namespace MMaster
                                 libraryCallName = library.Name;
                             }
 
-                            IEnumerable<MethodInfo> methodInfos = library.GetMethods(BindingFlags.Static | BindingFlags.Public)
+                            IEnumerable<MethodInfo> methodInfos = library.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic )
                                                                             .Where<MethodInfo>((Func<MethodInfo, bool>)(m => ((IEnumerable<object>)m.GetCustomAttributes(false))
                                                                             .Where<object>((Func<object, bool>)(a => a.GetType().Name.Contains(typeof(MMasterCommand).Name))).Any()));
 
