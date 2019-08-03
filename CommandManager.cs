@@ -39,13 +39,22 @@ namespace MMaster
         {
             CFormat.WriteLine("[CommandManager] Loading internal commands...");
 
-            foreach (Type library in ((IEnumerable<Type>)Assembly.GetExecutingAssembly().GetTypes()).Where(t =>
-          {
-              if (t.IsClass && t.GetCustomAttributes().Where(a => a.GetType() == typeof(MMasterLibrary)).Any())
-                  return t.Namespace == _InternalNamespace;
-              return false;
-          }).ToList<Type>())
+            List<Type> foundInternalLibraries = ((IEnumerable<Type>)Assembly.GetExecutingAssembly().GetTypes()).Where(t =>
+            {
+                if (t.IsClass && t.GetCustomAttributes().Where(a => a.GetType() == typeof(MMasterLibrary)).Any())
+                    return t.Namespace == _InternalNamespace;
+                return false;
+            }).ToList();
 
+            if (foundInternalLibraries.Count() == 0)
+            {
+                CFormat.WriteLine(ConsoleColor.Red, "[CommandManager] CRITICAL ISSUE: No internal commands loaded.",
+                                                    "[CommandManager] Please report bug on GitHub at MMaster-Command-Prompt page.");
+                CFormat.JumpLine();
+                return;
+            }
+
+            foreach (Type library in foundInternalLibraries)
             {
                 string libraryCallName = library.GetCustomAttribute<MMasterLibrary>().CallName;
                 if (String.IsNullOrEmpty(libraryCallName))
@@ -112,9 +121,9 @@ namespace MMaster
 
             try
             {
-                if (CommandManager.LoadedFileIDs.Any<FileID>((Func<FileID, bool>)(x => x.Path == Path.Combine(Path.GetDirectoryName(path) == "" ? AppDomain.CurrentDomain.BaseDirectory : "", path))))
+                if (LoadedFileIDs.Any(x => x.Path == Path.Combine(Path.GetDirectoryName(path) == "" ? AppDomain.CurrentDomain.BaseDirectory : "", path)))
                 {
-                    CFormat.WriteLine("[CommandManager]    Could not load file named \"" + fileName + "\" because it has already been loaded.", ConsoleColor.Red);
+                    CFormat.WriteLine("[CommandManager] Could not load file named \"" + fileName + "\" because it has already been loaded.", ConsoleColor.Red);
                 }
                 else
                 {
@@ -143,7 +152,16 @@ namespace MMaster
                     }
                     else
                     {
-                        foreach (Type library in ((IEnumerable<Type>)compilerResults.CompiledAssembly.GetTypes()).Where<Type>((Func<Type, bool>)(t => t.IsClass)).ToList<Type>())
+                        List<Type> foundExternalLibraries = compilerResults.CompiledAssembly.GetTypes()
+                            .Where(t => t.IsClass && t.GetCustomAttributes().Where(a => a.GetType() == typeof(MMasterLibrary)).Any()).ToList();
+
+                        if (foundExternalLibraries.Count == 0)
+                        {
+                            CFormat.WriteLine("[CommandManager]    \"" + fileName + "\" does not contain any library.", ConsoleColor.DarkYellow);
+                            return;
+                        }
+
+                        foreach (Type library in foundExternalLibraries)
                         {
                             string libraryCallName = library.GetCustomAttribute<MMasterLibrary>().CallName;
                             if (String.IsNullOrEmpty(libraryCallName))
@@ -226,9 +244,9 @@ namespace MMaster
 
         internal static void ClearExternalCommands()
         {
-            CommandManager.ExternalLibraryCallNames.Clear();
-            CommandManager.ExternalLibraries.Clear();
-            CommandManager.LoadedFileIDs.Clear();
+            ExternalLibraryCallNames.Clear();
+            ExternalLibraries.Clear();
+            LoadedFileIDs.Clear();
         }
 
         internal static void UnloadFile(int id)

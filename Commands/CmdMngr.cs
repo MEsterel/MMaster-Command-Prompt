@@ -16,7 +16,7 @@ namespace MMaster.Commands
             CommandManager.ClearExternalCommands();
             CFormat.WriteLine("[CommandManager] Cleared loaded external commands.", ConsoleColor.Gray);
             CFormat.JumpLine();
-            CommandManager.LoadExternalCommands();
+            CommandManager.LoadExternalCommands(true);
         }
 
         [MMasterCommand("Load a file of external commands.")]
