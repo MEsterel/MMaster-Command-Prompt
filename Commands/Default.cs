@@ -101,7 +101,14 @@ namespace MMaster.Commands
 
             foreach (Type library in CommandManager.ExternalLibraryCallNames.Values)
             {
-                CFormat.WriteLine(library.Name, ConsoleColor.Yellow);
+                string libraryCallName = CommandManager.ExternalLibraryCallNames.FirstOrDefault(x => x.Value == library).Key;
+                string libraryHelpPrompt = library.GetCustomAttribute<MMasterLibrary>().HelpPrompt;
+                if (!String.IsNullOrEmpty(libraryHelpPrompt))
+                {
+                    libraryHelpPrompt = " (" + libraryHelpPrompt + ")";
+                }
+
+                CFormat.WriteLine(libraryCallName + libraryHelpPrompt, ConsoleColor.Yellow);
                 foreach (MethodInfo methodInfo in CommandManager.ExternalLibraries[library].Values)
                 {
                     MMasterCommand mMasterCommand = methodInfo.GetCustomAttribute<MMasterCommand>();
