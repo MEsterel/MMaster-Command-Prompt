@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Builds\1.1.0.0\MMaster.exe" />
+    <Content Include="Builds\1.2.0.0\MMaster.exe" />
     <Content Include="MMaster_32512.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
