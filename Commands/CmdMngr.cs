@@ -5,7 +5,7 @@ using System.Text;
 
 namespace MMaster.Commands
 {
-    [MMasterLibrary("Loads internal and external commands.", "CM")]
+    [MMasterLibrary("Loads internal and external commands.")]
     public static class CmdMngr
     {
         public const string _templateFileNameWithoutExtension = "MMaster Command File";

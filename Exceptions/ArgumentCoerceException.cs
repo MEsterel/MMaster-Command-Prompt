@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace MMaster.Exceptions
 {
-    internal class ArgumentParseException : Exception
+    internal class ArgumentCoerceException : Exception
     {
         internal string ArgumentName { get; }
         internal string ArgumentTargetType { get; }
 
-        internal ArgumentParseException() : base() { }
+        internal ArgumentCoerceException() : base() { }
 
-        internal ArgumentParseException(string argumentName, string argumentTargetType) : base()
+        internal ArgumentCoerceException(string argumentName, string argumentTargetType) : base()
         {
             ArgumentName = argumentName;
             ArgumentTargetType = argumentTargetType;

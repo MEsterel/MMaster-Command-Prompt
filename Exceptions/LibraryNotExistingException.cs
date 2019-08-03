@@ -4,8 +4,13 @@ namespace MMaster.Exceptions
 {
     internal class LibraryNotExistingException : Exception
     {
-        internal LibraryNotExistingException() : base()
+        internal CParsedInput ParsedInput { get; }
+
+        internal LibraryNotExistingException() : base() { }
+
+        internal LibraryNotExistingException(CParsedInput parsedInput) : base()
         {
+            ParsedInput = parsedInput;
         }
     }
 }

@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using MMaster.Exceptions;
 using System.Text;
 
 namespace MMaster.Commands
 {
-    [MMasterLibrary("The commands of this script can be called without the 'Default.' prefix.")]
+    [MMasterLibrary("The commands of this library can be called without the 'Default.' prefix.")]
     public static class Default
     {
         [MMasterCommand("Debug command for various tests.")]
@@ -29,63 +30,32 @@ namespace MMaster.Commands
             }
             else
             {
-                CParsedInput parsedInput = new CParsedInput(stringCommand);
-                if (parsedInput.Library == (Type)null)
+                try
                 {
-                    CFormat.WriteLine("Help: This command does not exist.", ConsoleColor.Gray);
+                    CParsedInput parsedInput = new CParsedInput(stringCommand, true);
+
+                    string helpPrompt = parsedInput.CommandMethodInfo.GetCustomAttribute<MMasterCommand>().HelpPrompt;
+
+                    if (helpPrompt == "")
+                    {
+                        CFormat.WriteLine(CFormat.GetArgsFormat(parsedInput.FullCallName, parsedInput.CommandMethodInfo.GetParameters()));
+                    }
+                    else
+                    {
+                        CFormat.WriteLine(helpPrompt, CFormat.GetArgsFormat(parsedInput.FullCallName, parsedInput.CommandMethodInfo.GetParameters()));
+                    }
                 }
-                else
+                catch (WrongCallFormatException)
                 {
-                    Dictionary<string, MethodInfo> source;
-
-                    if (CommandManager.InternalLibraries.ContainsKey(parsedInput.Library))
-                    {
-                        source = CommandManager.InternalLibraries[parsedInput.Library];
-                    }
-                    else if (CommandManager.ExternalLibraries.ContainsKey(parsedInput.Library))
-                    {
-                        source = CommandManager.ExternalLibraries[parsedInput.Library];
-                    }
-                    else
-                    {
-                        CFormat.WriteLine("Help: This command does not exist.", ConsoleColor.Gray);
-                        return;
-                    }
-
-                    if (source.Any<KeyValuePair<string, MethodInfo>>((Func<KeyValuePair<string, MethodInfo>, bool>)(i => i.Key.ToLower().Equals(parsedInput.RawCall.ToLower()))))
-                    {
-                        parsedInput.RawCall = source.Keys.Where<string>((Func<string, bool>)(i => i.ToLower().Equals(parsedInput.RawCall.ToLower()))).ToArray<string>()[0];
-
-                        MethodInfo method = parsedInput.Library.GetMethod(parsedInput.RawCall);
-
-                        object[] array = ((IEnumerable<object>)method.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name == typeof(MMasterCommand).Name)).ToArray<object>();
-
-                        MMasterCommand mmasterCommand;
-                        try
-                        {
-                            mmasterCommand = (MMasterCommand)array[0];
-                        }
-                        catch
-                        {
-                            CFormat.WriteLine("Help: This command does not exist.");
-                            return;
-                        }
-                        if (mmasterCommand.HelpPrompt == "")
-                        {
-                            CFormat.WriteLine(CFormat.GetArgsFormat(parsedInput.FullName, (IEnumerable<ParameterInfo>)method.GetParameters()), ConsoleColor.Gray);
-                        }
-                        else
-                        {
-                            StringBuilder stringBuilder = new StringBuilder();
-                            stringBuilder.AppendLine(mmasterCommand.HelpPrompt);
-                            stringBuilder.Append(CFormat.GetArgsFormat(parsedInput.FullName, (IEnumerable<ParameterInfo>)method.GetParameters()));
-                            CFormat.WriteLine(stringBuilder.ToString());
-                        }
-                    }
-                    else
-                    {
-                        CFormat.WriteLine("This command does not exist.", ConsoleColor.Gray);
-                    }
+                    CFormat.WriteLine("Wrong call format.", "The call should be as it follows: <Library>.<Command> [arg1] [arg2] [etc.]");
+                }
+                catch (LibraryNotExistingException)
+                {
+                    CFormat.WriteLine("This library does not exist.");
+                }
+                catch (CommandNotExistingException)
+                {
+                    CFormat.WriteLine("This command does not exist.");
                 }
             }
         }
@@ -111,41 +81,38 @@ namespace MMaster.Commands
 
                     foreach (MethodInfo methodInfo in CommandManager.InternalLibraries[library].Values)
                     {
-                        string str = " (";
                         MMasterCommand mMasterCommand = methodInfo.GetCustomAttribute<MMasterCommand>();
-                        try
+                        string helpPrompt = mMasterCommand.HelpPrompt;
+                        if (!String.IsNullOrEmpty(helpPrompt))
                         {
-                            str = str + mMasterCommand.HelpPrompt + ")";
+                            helpPrompt = " (" + helpPrompt + ")";
                         }
-                        catch
-                        {
-                        }
-                        CFormat.WriteLine(CFormat.Indent(3) + "." + methodInfo.Name + str, ConsoleColor.Gray);
+                        CFormat.WriteLine(CFormat.Indent(3) + "." + methodInfo.Name + helpPrompt);
                     }
                     CFormat.JumpLine();
                 }
             }
+
             if (CommandManager.ExternalLibraryCallNames.Count == 0)
                 return;
+
             CFormat.WriteLine("[External commands]", ConsoleColor.Green);
             int num = 1;
+
             foreach (Type index in CommandManager.ExternalLibraryCallNames.Values)
             {
                 CFormat.WriteLine(index.Name, ConsoleColor.Yellow);
                 foreach (MethodInfo methodInfo in CommandManager.ExternalLibraries[index].Values)
                 {
-                    string str = " (";
-                    object[] array = ((IEnumerable<object>)methodInfo.GetCustomAttributes(false)).Where<object>((Func<object, bool>)(a => a.GetType().Name == typeof(MMasterCommand).Name)).ToArray<object>();
-                    try
+                    MMasterCommand mMasterCommand = methodInfo.GetCustomAttribute<MMasterCommand>();
+                    string helpPrompt = mMasterCommand.HelpPrompt;
+                    if (!String.IsNullOrEmpty(helpPrompt))
                     {
-                        MMasterCommand mmasterCommand = (MMasterCommand)array[0];
-                        str = str + mmasterCommand.HelpPrompt + ")";
+                        helpPrompt = " (" + helpPrompt + ")";
                     }
-                    catch
-                    {
-                    }
-                    CFormat.WriteLine(CFormat.Indent(3) + "." + methodInfo.Name + str, ConsoleColor.Gray);
+                    CFormat.WriteLine(CFormat.Indent(3) + "." + methodInfo.Name + helpPrompt);
                 }
+
                 if (num < CommandManager.ExternalLibraryCallNames.Values.Count)
                     CFormat.JumpLine();
                 ++num;

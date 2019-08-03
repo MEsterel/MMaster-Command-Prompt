@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MMaster.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -9,7 +10,7 @@ namespace MMaster
     {
         private static readonly string appName = Assembly.GetExecutingAssembly().GetName().Name;
         private static readonly Version appVersion = Assembly.GetExecutingAssembly().GetName().Version;
-        private static readonly string bootMessage = Program.appName + " Command Prompt [version " + Program.appVersion.ToString() + "]" + Environment.NewLine + "(c) 2017-2018 Matthieu Badoy. All rights reserved.";
+        private static readonly string bootMessage = Program.appName + " Command Prompt [version " + Program.appVersion.ToString() + "]" + Environment.NewLine + "(c) 2017-2019 Matthieu Badoy. All rights reserved.";
 
         private static void Main(string[] args)
         {
@@ -27,106 +28,49 @@ namespace MMaster
         {
             while (true)
             {
-                object obj;
+                string userInput;
                 do
                 {
                     CFormat.JumpLine();
-                    obj = CInput.ReadFromConsole("", ConsoleInputType.String, false, -1, char.MinValue);
+                    userInput = CInput.ReadFromConsole("", ConsoleInputType.String, false, -1, char.MinValue).ToString();
                 }
-                while (string.IsNullOrWhiteSpace(obj.ToString()));
-                try
-                {
-                    Program.Execute(new CParsedInput(obj.ToString()));
-                }
-                catch (Exception ex)
-                {
-                    CFormat.WriteLine(ex.Message, ConsoleColor.Gray);
-                }
+                while (string.IsNullOrWhiteSpace(userInput));
+
+                Execute(userInput);
             }
         }
 
-        private static void Execute(CParsedInput parsedInput)
+        private static void Execute(string userInput)
         {
-            if (parsedInput.Library == (Type)null)
+            try
             {
-                CFormat.WriteLine("This command does not exist.", ConsoleColor.Gray);
+                CParsedInput parsedInput = new CParsedInput(userInput);
+
+                parsedInput.CommandMethodInfo.Invoke(null, parsedInput.Parameters);
             }
-            else
+            catch (WrongCallFormatException)
             {
-                Dictionary<string, MethodInfo> libraryCommands;
-                if (CommandManager.InternalLibraries.ContainsKey(parsedInput.Library))
-                {
-                    libraryCommands = CommandManager.InternalLibraries[parsedInput.Library];
-                }
-                else if (CommandManager.ExternalLibraries.ContainsKey(parsedInput.Library))
-                {
-                    libraryCommands = CommandManager.ExternalLibraries[parsedInput.Library];
-                }
-                else
-                {
-                    CFormat.WriteLine("This command does not exist.");
-                    return;
-                }
-                if (libraryCommands.Any<KeyValuePair<string, MethodInfo>>((Func<KeyValuePair<string, MethodInfo>, bool>)(i => i.Key.ToLower().Equals(parsedInput.RawCall.ToLower()))))
-                {
-                    parsedInput.RawCall = libraryCommands.Keys.Where<string>((Func<string, bool>)(i => i.ToLower().Equals(parsedInput.RawCall.ToLower()))).ToArray<string>()[0];
-                    IEnumerable<ParameterInfo> list = (IEnumerable<ParameterInfo>)((IEnumerable<ParameterInfo>)libraryCommands[parsedInput.RawCall].GetParameters()).ToList<ParameterInfo>();
-                    List<object> objectList = new List<object>();
-                    IEnumerable<ParameterInfo> source2 = list.Where<ParameterInfo>((Func<ParameterInfo, bool>)(p => !p.IsOptional));
-                    IEnumerable<ParameterInfo> source3 = list.Where<ParameterInfo>((Func<ParameterInfo, bool>)(p => p.IsOptional));
-                    int num1 = source2.Count<ParameterInfo>();
-                    source3.Count<ParameterInfo>();
-                    int num2 = parsedInput.Arguments.Count<string>();
-                    if (num1 > num2)
-                    {
-                        CFormat.WriteLine("Missing required argument." + Environment.NewLine + CFormat.GetArgsFormat(parsedInput.FullName, list), ConsoleColor.Gray);
-                    }
-                    else
-                    {
-                        if (list.Count<ParameterInfo>() > 0)
-                        {
-                            foreach (ParameterInfo parameterInfo in list)
-                                objectList.Add(parameterInfo.DefaultValue);
-                            for (int index = 0; index < list.Count<ParameterInfo>(); ++index)
-                            {
-                                ParameterInfo parameterInfo = list.ElementAt<ParameterInfo>(index);
-                                Type parameterType = parameterInfo.ParameterType;
-                                try
-                                {
-                                    try
-                                    {
-                                        parsedInput.Arguments.ElementAt<string>(index);
-                                    }
-                                    catch
-                                    {
-                                        continue;
-                                    }
-                                    object obj = CFormat.CoerceArgument(parameterType, parsedInput.Arguments.ElementAt<string>(index));
-                                    objectList.RemoveAt(index);
-                                    objectList.Insert(index, obj);
-                                }
-                                catch (ArgumentException)
-                                {
-                                    throw new ArgumentException(string.Format("The value passed for argument '{0}' cannot be parsed to type '{1}'", parameterInfo.Name, parameterType.Name));
-                                }
-                            }
-                        }
-                        Assembly assembly = typeof(Program).Assembly;
-                        object[] parameters = (object[])null;
-                        if (objectList.Count > 0)
-                            parameters = objectList.ToArray();
-                        try
-                        {
-                            libraryCommands[parsedInput.RawCall].Invoke(null, parameters);
-                        }
-                        catch (TargetInvocationException ex)
-                        {
-                            throw ex.InnerException;
-                        }
-                    }
-                }
-                else
-                    CFormat.WriteLine("This command does not exist.", ConsoleColor.Gray);
+                CFormat.WriteLine("Wrong call format.","The call should be as it follows: <Library>.<Command> [arg1] [arg2] [etc.]");
+            }
+            catch (LibraryNotExistingException)
+            {
+                CFormat.WriteLine("This library does not exist.");
+            }
+            catch (CommandNotExistingException)
+            {
+                CFormat.WriteLine("This command does not exist.");
+            }
+            catch (MissingArgumentException ex)
+            {
+                CFormat.WriteLine("Missing required argument.", CFormat.GetArgsFormat(ex.ParsedInput.FullCallName, ex.ParsedInput.CommandMethodInfo.GetParameters()));
+            }
+            catch (ArgumentCoerceException ex)
+            {
+                CFormat.WriteLine(string.Format("The argument '{0}' cannot be parsed to type '{1}'", ex.ArgumentName, ex.ArgumentTargetType));
+            }
+            catch (Exception ex)
+            {
+                CFormat.WriteLine(ex.Message);
             }
         }
     }

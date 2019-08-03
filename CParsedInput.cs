@@ -12,6 +12,8 @@ namespace MMaster
     {
         private List<string> Arguments;
 
+        internal object[] Parameters { get; } = null;
+
         internal string RawCall { get; }
 
         internal Type Library { get; }
@@ -36,7 +38,7 @@ namespace MMaster
             }
         }
 
-        internal CParsedInput(string input)
+        internal CParsedInput(string input, bool ignoreArguments = false)
         {
             string[] splitInput = Regex.Split(input, "(?<=^[^\"]*(?:\"[^\"]*\"[^\"]*)*) (?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)");
 
@@ -51,9 +53,9 @@ namespace MMaster
             {
                 Library = typeof(Default);
 
-                if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[1]))
+                if (CommandManager.InternalLibraries[Library].Keys.Any(x => x.ToLower() == splitCall[0]))
                 {
-                    CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[1]);
+                    CommandCallName = CommandManager.InternalLibraries[Library].Keys.FirstOrDefault(x => x.ToLower() == splitCall[0]);
                     CommandMethodInfo = CommandManager.InternalLibraries[Library][CommandCallName];
                 }
                 else
@@ -98,8 +100,15 @@ namespace MMaster
             }
             else
             {
-                throw new WrongCallFormatException("The call should be as it follows: <Library>.<Command> [arg1] [arg2] [etc.]");
+                throw new WrongCallFormatException();
             }
+
+
+
+            if (ignoreArguments)
+                return;
+
+
 
             // PARSE ARGS
             for (int index = 1; index < splitInput.Length; ++index)
@@ -110,6 +119,49 @@ namespace MMaster
                 if (match.Captures.Count > 0)
                     computedArg = new Regex("[^\"]*[^\"]").Match(match.Captures[0].Value).Captures[0].Value;
                 this.Arguments.Add(computedArg);
+            }
+
+            // COERCE ARGS
+            IEnumerable<ParameterInfo> parameterInfos = CommandMethodInfo.GetParameters().ToList();
+            List<object> objectList = new List<object>(); // Collecting args as objects
+
+            IEnumerable<ParameterInfo> parameterInfosNecessary = parameterInfos.Where(p => !p.IsOptional);
+            IEnumerable<ParameterInfo> parameterInfosOptional = parameterInfos.Where(p => p.IsOptional);
+
+            if (parameterInfosNecessary.Count() > Arguments.Count())
+            {
+                throw new MissingArgumentException(this);
+            }
+            else
+            {
+                if (parameterInfos.Count() > 0)
+                {
+                    foreach (ParameterInfo PI in parameterInfos)
+                        objectList.Add(PI.DefaultValue);
+
+                    for (int index = 0; index < parameterInfos.Count(); ++index)
+                    {
+                        ParameterInfo PI = parameterInfos.ElementAt(index);
+                        Type parameterType = PI.ParameterType;
+
+                        try // The following instruction can fail (in case of optional args) so its accessibility is tested before.
+                        {
+                            Arguments.ElementAt(index);
+                        }
+                        catch
+                        {
+                            continue;
+                        }
+
+                        object obj = CFormat.CoerceArgument(parameterType, Arguments.ElementAt(index));
+                        objectList.RemoveAt(index);
+                        objectList.Insert(index, obj);
+                    }
+
+                    // EXPORT PARAMETERS to an array
+                    if (objectList.Count > 0)
+                        Parameters = objectList.ToArray();
+                }
             }
         }
     }

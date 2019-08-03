@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MMaster.Exceptions;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -30,98 +31,97 @@ namespace MMaster
         internal static object CoerceArgument(Type requiredType, string inputValue)
         {
             TypeCode typeCode = Type.GetTypeCode(requiredType);
-            string message = string.Format("Cannnot coerce the input argument {0} to required type {1}", inputValue, requiredType.Name);
             object obj;
             switch (typeCode)
             {
                 case TypeCode.Boolean:
                     bool result1;
                     if (!bool.TryParse(inputValue, out result1))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result1;
                     break;
 
                 case TypeCode.Char:
                     char result2;
                     if (!char.TryParse(inputValue, out result2))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result2;
                     break;
 
                 case TypeCode.Byte:
                     byte result3;
                     if (!byte.TryParse(inputValue, out result3))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result3;
                     break;
 
                 case TypeCode.Int16:
                     short result4;
                     if (!short.TryParse(inputValue, out result4))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result4;
                     break;
 
                 case TypeCode.UInt16:
                     ushort result5;
                     if (!ushort.TryParse(inputValue, out result5))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result5;
                     break;
 
                 case TypeCode.Int32:
                     int result6;
                     if (!int.TryParse(inputValue, out result6))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result6;
                     break;
 
                 case TypeCode.UInt32:
                     uint result7;
                     if (!uint.TryParse(inputValue, out result7))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result7;
                     break;
 
                 case TypeCode.Int64:
                     long result8;
                     if (!long.TryParse(inputValue, out result8))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result8;
                     break;
 
                 case TypeCode.UInt64:
                     ulong result9;
                     if (!ulong.TryParse(inputValue, out result9))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result9;
                     break;
 
                 case TypeCode.Single:
                     float result10;
                     if (!float.TryParse(inputValue, out result10))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result10;
                     break;
 
                 case TypeCode.Double:
                     double result11;
                     if (!double.TryParse(inputValue, out result11))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result11;
                     break;
 
                 case TypeCode.Decimal:
                     Decimal result12;
                     if (!Decimal.TryParse(inputValue, out result12))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result12;
                     break;
 
                 case TypeCode.DateTime:
                     DateTime result13;
                     if (!DateTime.TryParse(inputValue, out result13))
-                        throw new ArgumentException(message);
+                        throw new ArgumentCoerceException(inputValue, requiredType.Name);
                     obj = result13;
                     break;
 
@@ -130,7 +130,7 @@ namespace MMaster
                     break;
 
                 default:
-                    throw new ArgumentException(message);
+                    throw new ArgumentCoerceException(inputValue, requiredType.Name);
             }
             return obj;
         }
@@ -179,6 +179,28 @@ namespace MMaster
             if (Console.ForegroundColor != color)
                 Console.ForegroundColor = color;
             Console.WriteLine(text);
+        }
+
+        public static void WriteLine(params string[] text)
+        {
+            if (Console.ForegroundColor != ConsoleColor.Gray)
+                Console.ForegroundColor = ConsoleColor.Gray;
+
+            foreach (string line in text)
+            {
+                Console.WriteLine(line);
+            }
+        }
+
+        public static void WriteLine(ConsoleColor color, params string[] text)
+        {
+            if (Console.ForegroundColor != color)
+                Console.ForegroundColor = color;
+
+            foreach (string line in text)
+            {
+                Console.WriteLine(line);
+            }
         }
 
         public static void Write(string text, ConsoleColor color = ConsoleColor.Gray)

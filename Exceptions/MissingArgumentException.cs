@@ -8,13 +8,12 @@ namespace MMaster.Exceptions
 {
     internal class MissingArgumentException : Exception
     {
-        internal string MissingArgumentName { get; }
+        internal CParsedInput ParsedInput { get; }
 
         internal MissingArgumentException() : base() { }
-
-        internal MissingArgumentException(string missingArgumentName) : base()
+        internal MissingArgumentException(CParsedInput parsedInput) : base()
         {
-            MissingArgumentName = missingArgumentName;
+            ParsedInput = parsedInput;
         }
     }
 }
