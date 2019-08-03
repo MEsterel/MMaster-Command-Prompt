@@ -9,7 +9,7 @@ The MMaster command prompt is a terminal that **compiles your *.cs files just-in
 
 ## Easy to use
 
-Building a command for the MMaster command prompt is **so easy** that it almost won't change your dev habits: just add the *MMasterLibrary* attribute on top of the class containing your commands which are actually *public static void* methods with the *MMasterCommand* attribute.
+Building a command for the MMaster command prompt is **so easy** that it almost won't change your dev habits: just add the *MMasterLibrary* attribute on top of the class containing your commands which are actually *static void* methods with the *MMasterCommand* attribute.
 
 ## Pre-built command line tools
 
