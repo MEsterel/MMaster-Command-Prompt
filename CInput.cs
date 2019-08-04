@@ -46,68 +46,79 @@ namespace MMaster
                 // READ BUFFER
                 if (consoleKeyInfo.Key == ConsoleKey.Enter)
                 {
-                    CInput.ValidateHistory();
-                    CInput.AddToHistory(CInput._readBuffer);
+                    ValidateHistory();
+                    if (!String.IsNullOrEmpty(_readBuffer))
+                        AddToHistory(_readBuffer);
+
                     Console.ForegroundColor = foregroundColor;
                     CFormat.JumpLine();
+
                     switch (inputType)
                     {
                         case ConsoleInputType.String:
-                            return CInput._readBuffer;
+                            return _readBuffer;
 
                         case ConsoleInputType.Int:
-                            return int.Parse(CInput._readBuffer);
+                            if (String.IsNullOrEmpty(_readBuffer))
+                            {
+                                return null;
+                            }
+                            return int.Parse(_readBuffer);
 
                         case ConsoleInputType.Double:
-                            return double.Parse(CInput._readBuffer.Replace(".", ","));
+                            if (String.IsNullOrEmpty(_readBuffer))
+                            {
+                                return null;
+                            }
+                            return double.Parse(_readBuffer.Replace(".", ","));
                     }
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Backspace)
                 {
-                    CInput.ValidateHistory();
-                    if (CInput.cursorPos > 0)
+                    ValidateHistory();
+                    if (cursorPos > 0)
                     {
-                        if (CInput.cursorPos != CInput._readBuffer.Length)
+                        if (cursorPos != _readBuffer.Length)
                         {
-                            string str2 = CInput._readBuffer.Substring(0, CInput.cursorPos - 1);
-                            string str3 = CInput._readBuffer.Substring(CInput.cursorPos, CInput._readBuffer.Length - CInput.cursorPos);
-                            CInput._readBuffer = str2 + str3;
-                            CInput.MoveCursorBack();
-                            CInput.UserWrite(str3 + " ");
+                            string str2 = _readBuffer.Substring(0, cursorPos - 1);
+                            string str3 = _readBuffer.Substring(cursorPos, _readBuffer.Length - cursorPos);
+                            _readBuffer = str2 + str3;
+                            MoveCursorBack();
+                            UserWrite(str3 + " ");
                             for (int index = 0; index < str3.Length + 1; ++index)
-                                CInput.MoveCursorBack();
+                                MoveCursorBack();
                         }
                         else
                         {
-                            CInput._readBuffer = CInput._readBuffer.Substring(0, CInput._readBuffer.Length - 1);
-                            CInput.MoveCursorBack();
-                            CInput.UserWrite(" ");
-                            CInput.MoveCursorBack();
+                            _readBuffer = _readBuffer.Substring(0, _readBuffer.Length - 1);
+                            MoveCursorBack();
+                            UserWrite(" ");
+                            MoveCursorBack();
                         }
                     }
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Delete)
                 {
-                    CInput.ValidateHistory();
-                    if (CInput.cursorPos < CInput._readBuffer.Length)
+                    ValidateHistory();
+                    if (cursorPos < _readBuffer.Length)
                     {
-                        string str2 = CInput._readBuffer.Substring(0, CInput.cursorPos);
-                        string str3 = CInput._readBuffer.Substring(CInput.cursorPos + 1, CInput._readBuffer.Length - CInput.cursorPos - 1);
-                        CInput._readBuffer = str2 + str3;
-                        CInput.UserWrite(str3 + " ");
+                        string str2 = _readBuffer.Substring(0, cursorPos);
+                        string str3 = _readBuffer.Substring(cursorPos + 1, _readBuffer.Length - cursorPos - 1);
+                        _readBuffer = str2 + str3;
+                        UserWrite(str3 + " ");
                         for (int index = 0; index < str3.Length + 1; ++index)
-                            CInput.MoveCursorBack();
+                            MoveCursorBack();
                     }
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Home)
                 {
                     for (int cursorPos = CInput.cursorPos; cursorPos > 0; --cursorPos)
-                        CInput.MoveCursorBack();
+                        MoveCursorBack();
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.End)
                 {
-                    for (int cursorPos = CInput.cursorPos; cursorPos < CInput._readBuffer.Length; ++cursorPos)
-                        CInput.MoveCursorAhead();
+                    for (int cursorPos = CInput.cursorPos; cursorPos < _readBuffer.Length; ++cursorPos)
+                        MoveCursorAhead();
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Escape)
                 {
@@ -116,19 +127,19 @@ namespace MMaster
                 }
                 else if (consoleKeyInfo.Key == ConsoleKey.Insert)
                 {
-                    CInput.insertMode = !CInput.insertMode;
-                    Console.CursorSize = !CInput.insertMode ? 1 : 100;
+                    insertMode = !insertMode;
+                    Console.CursorSize = !insertMode ? 1 : 100;
                 }
                 else if (consoleKeyInfo.Key != ConsoleKey.Spacebar && consoleKeyInfo.KeyChar == char.MinValue)
                 {
-                    if (consoleKeyInfo.Key == ConsoleKey.RightArrow && CInput.cursorPos < CInput._readBuffer.Length)
-                        CInput.MoveCursorAhead();
-                    else if (consoleKeyInfo.Key == ConsoleKey.LeftArrow && CInput.cursorPos > 0)
-                        CInput.MoveCursorBack();
+                    if (consoleKeyInfo.Key == ConsoleKey.RightArrow && cursorPos < _readBuffer.Length)
+                        MoveCursorAhead();
+                    else if (consoleKeyInfo.Key == ConsoleKey.LeftArrow && cursorPos > 0)
+                        MoveCursorBack();
                     else if (consoleKeyInfo.Key == ConsoleKey.UpArrow)
-                        CInput.OlderHistory();
+                        OlderHistory();
                     else if (consoleKeyInfo.Key == ConsoleKey.DownArrow)
-                        CInput.NewerHistory();
+                        NewerHistory();
                 }
                 // Tab auto-completition
                 else if (consoleKeyInfo.Key == ConsoleKey.Tab)

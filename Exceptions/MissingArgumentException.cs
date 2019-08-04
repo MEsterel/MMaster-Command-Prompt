@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MMaster.Exceptions
 {
+    [Serializable]
     internal class MissingArgumentException : Exception
     {
         internal CParsedInput ParsedInput { get; }

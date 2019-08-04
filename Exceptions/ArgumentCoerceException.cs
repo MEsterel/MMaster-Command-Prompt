@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace MMaster.Exceptions
 {
+    [Serializable]
     internal class ArgumentCoerceException : Exception
     {
         internal string ArgumentName { get; }

@@ -1,23 +1,31 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace MMaster
 {
     internal class FileID
     {
-        public int ID { get; private set; }
+        public int ID { get; }
 
-        public string Path { get; private set; }
+        public string Path { get; }
 
-        public List<string> Types { get; set; }
+        public bool LoadedAsdependency { get; }
 
-        public List<string> Methods { get; set; }
+        public List<string> LibraryCallNames { get; set; } = new List<string>();
 
-        internal FileID(int id, string path)
+        public string Name
+        {
+            get
+            {
+                return System.IO.Path.GetFileName(Path);
+            }
+        }
+
+        internal FileID(int id, string path, bool loadedAsdependency = false)
         {
             this.ID = id;
             this.Path = path;
-            this.Types = new List<string>();
-            this.Methods = new List<string>();
+            LoadedAsdependency = loadedAsdependency;
         }
     }
 }

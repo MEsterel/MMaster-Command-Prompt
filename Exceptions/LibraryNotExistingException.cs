@@ -2,6 +2,7 @@
 
 namespace MMaster.Exceptions
 {
+    [Serializable]
     internal class LibraryNotExistingException : Exception
     {
         internal CParsedInput ParsedInput { get; }

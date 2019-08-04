@@ -2,6 +2,7 @@
 
 namespace MMaster.Exceptions
 {
+    [Serializable]
     internal class WrongCallFormatException : Exception
     {
         internal WrongCallFormatException() : base()
