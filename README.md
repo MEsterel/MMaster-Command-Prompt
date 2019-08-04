@@ -3,6 +3,8 @@ A command prompt that expands through simple C# files (*.cs) compiled on startup
 
 This allows the **development of little ideas on the go** by creating simple scripts thanks to lite editors (VS Code for instance).
 
+Download: https://github.com/MEsterel/MMaster-Command-Prompt/releases
+
 ## Adaptative
 
 The MMaster command prompt is a terminal that **compiles your \*.cs files just-in-time**, so you can develop little tools to be called with "commands" when needed. This makes MMaster a terminal with endless possibilites.
