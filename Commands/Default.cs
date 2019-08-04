@@ -22,28 +22,61 @@ namespace MMaster.Commands
             }
         }
 
-        [MMasterCommand("Get the help prompt for a specific command.", "Help")]
-        public static void Help(string stringCommand = null)
+        [MMasterCommand("Get the help prompt for a specific command or library.", "Help")]
+        public static void Help(string stringCall = null)
         {
-            if (stringCommand == null)
+            if (stringCall == null)
             {
-                Default.List();
+                List();
             }
             else
             {
                 try
                 {
-                    CParsedInput parsedInput = new CParsedInput(stringCommand, true);
-
-                    string helpPrompt = parsedInput.CommandMethodInfo.GetCustomAttribute<MMasterCommand>().HelpPrompt;
-
-                    if (helpPrompt == "")
+                    // if the call is a library
+                    if (!stringCall.Contains(' ') && !stringCall.Contains('.'))
                     {
-                        CFormat.WriteLine(CFormat.GetArgsFormat(parsedInput.FullCallName, parsedInput.CommandMethodInfo.GetParameters()));
+                        Type library = CParsedInput.ParseLibrary(stringCall);
+
+                        if (library == null)
+                        {
+                            CFormat.WriteLine("This library does not exist.");
+                            return;
+                        }
+
+                        string libraryCallName = CommandManager.ExternalLibraryCallNames.FirstOrDefault(x => x.Value == library).Key;
+                        string libraryHelpPrompt = library.GetCustomAttribute<MMasterLibrary>().HelpPrompt;
+                        if (!String.IsNullOrEmpty(libraryHelpPrompt))
+                        {
+                            libraryHelpPrompt = " (" + libraryHelpPrompt + ")";
+                        }
+
+                        CFormat.WriteLine(libraryCallName + libraryHelpPrompt, ConsoleColor.Yellow);
+                        foreach (MethodInfo methodInfo in CommandManager.ExternalLibraries[library].Values)
+                        {
+                            MMasterCommand mMasterCommand = methodInfo.GetCustomAttribute<MMasterCommand>();
+                            string helpPrompt = mMasterCommand.HelpPrompt;
+                            if (!String.IsNullOrEmpty(helpPrompt))
+                            {
+                                helpPrompt = " (" + helpPrompt + ")";
+                            }
+                            CFormat.WriteLine(CFormat.Indent(3) + "." + methodInfo.Name + helpPrompt);
+                        }
                     }
                     else
                     {
-                        CFormat.WriteLine(helpPrompt, CFormat.GetArgsFormat(parsedInput.FullCallName, parsedInput.CommandMethodInfo.GetParameters()));
+                        CParsedInput parsedInput = new CParsedInput(stringCall, true);
+
+                        string helpPrompt = parsedInput.CommandMethodInfo.GetCustomAttribute<MMasterCommand>().HelpPrompt;
+
+                        if (helpPrompt == "")
+                        {
+                            CFormat.WriteLine(CFormat.GetArgsFormat(parsedInput.FullCallName, parsedInput.CommandMethodInfo.GetParameters()));
+                        }
+                        else
+                        {
+                            CFormat.WriteLine(helpPrompt, CFormat.GetArgsFormat(parsedInput.FullCallName, parsedInput.CommandMethodInfo.GetParameters()));
+                        }
                     }
                 }
                 catch (WrongCallFormatException)
